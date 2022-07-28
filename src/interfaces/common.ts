@@ -1,3 +1,5 @@
+import { StdFee } from "@cosmjs/stargate";
+
 type Builtin = Date | Function | Uint8Array | string | number | undefined;
 export type DeepPartial<T> = T extends Builtin
   ? T
@@ -8,3 +10,16 @@ export type DeepPartial<T> = T extends Builtin
   : T extends {}
   ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+
+export abstract class Msg {
+  typeUrl: string;
+  value: any;
+}
+
+export interface Tx {
+  sender: string;
+  msgs: Msg[];
+  fee: StdFee;
+  memo: string;
+}

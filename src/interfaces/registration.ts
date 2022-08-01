@@ -3,19 +3,39 @@ import { Reader, util, configure, Writer } from 'protobufjs/minimal';
 import Long from 'long';
 import { DeepPartial } from './common';
 
-export const registrationModuleProtobufPackage = 'smartarbitrage.dexilonl2.registration';
+export const protobufPackage = 'dexilon_exchange.dexilonL2.registration';
 
-export class MsgCreateAddressMapping {
+export interface MsgCreateAddressMapping {
   creator: string;
   chainId: number;
   address: string;
+}
 
-  private base: object = {
-    creator: '',
-    chainId: 0,
-    address: '',
-  };
+export interface MsgGrantPermissionRequest {
+  creator: string;
+  granterEthAddress: string;
+  signature: string;
+  signedMessage: string;
+  expirationTime: number;
+}
 
+export interface MsgRevokePermissionRequest {
+  creator: string;
+  granterEthAddress: string;
+  signature: string;
+  signedMessage: string;
+}
+
+export interface MsgEmptyResponse {}
+
+const baseMsgCreateAddressMapping: object = {
+  creator: '',
+  chainId: 0,
+  address: '',
+};
+
+export const MsgCreateAddressMapping = {
+  typeUrl: '/dexilon_exchange.dexilonL2.registration.MsgCreateAddressMapping',
   encode(message: MsgCreateAddressMapping, writer: Writer = Writer.create()): Writer {
     if (message.creator !== '') {
       writer.uint32(10).string(message.creator);
@@ -27,13 +47,13 @@ export class MsgCreateAddressMapping {
       writer.uint32(26).string(message.address);
     }
     return writer;
-  }
+  },
 
   decode(input: Reader | Uint8Array, length?: number): MsgCreateAddressMapping {
     const reader = input instanceof Uint8Array ? new Reader(input) : input;
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = {
-      ...this.base,
+      ...baseMsgCreateAddressMapping,
     } as MsgCreateAddressMapping;
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -53,11 +73,11 @@ export class MsgCreateAddressMapping {
       }
     }
     return message;
-  }
+  },
 
   fromJSON(object: any): MsgCreateAddressMapping {
     const message = {
-      ...this.base,
+      ...baseMsgCreateAddressMapping,
     } as MsgCreateAddressMapping;
     if (object.creator !== undefined && object.creator !== null) {
       message.creator = String(object.creator);
@@ -75,19 +95,19 @@ export class MsgCreateAddressMapping {
       message.address = '';
     }
     return message;
-  }
+  },
 
-  toJSON(message: MsgCreateAddressMapping): any {
+  toJSON(message: MsgCreateAddressMapping): unknown {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
     message.chainId !== undefined && (obj.chainId = message.chainId);
     message.address !== undefined && (obj.address = message.address);
     return obj;
-  }
+  },
 
   fromPartial(object: DeepPartial<MsgCreateAddressMapping>): MsgCreateAddressMapping {
     const message = {
-      ...this.base,
+      ...baseMsgCreateAddressMapping,
     } as MsgCreateAddressMapping;
     if (object.creator !== undefined && object.creator !== null) {
       message.creator = object.creator;
@@ -105,24 +125,19 @@ export class MsgCreateAddressMapping {
       message.address = '';
     }
     return message;
-  }
-}
+  },
+};
 
-export class MsgGrantPermissionRequest {
-  creator: string;
-  granterEthAddress: string;
-  signature: string;
-  signedMessage: string;
-  expirationTime: number;
+const baseMsgGrantPermissionRequest: object = {
+  creator: '',
+  granterEthAddress: '',
+  signature: '',
+  signedMessage: '',
+  expirationTime: 0,
+};
 
-  private base = {
-    creator: '',
-    granterEthAddress: '',
-    signature: '',
-    signedMessage: '',
-    expirationTime: 0,
-  };
-
+export const MsgGrantPermissionRequest = {
+  typeUrl: '/dexilon_exchange.dexilonL2.registration.MsgGrantPermissionRequest',
   encode(message: MsgGrantPermissionRequest, writer: Writer = Writer.create()): Writer {
     if (message.creator !== '') {
       writer.uint32(10).string(message.creator);
@@ -140,13 +155,13 @@ export class MsgGrantPermissionRequest {
       writer.uint32(40).uint64(message.expirationTime);
     }
     return writer;
-  }
+  },
 
   decode(input: Reader | Uint8Array, length?: number): MsgGrantPermissionRequest {
     const reader = input instanceof Uint8Array ? new Reader(input) : input;
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = {
-      ...this.base,
+      ...baseMsgGrantPermissionRequest,
     } as MsgGrantPermissionRequest;
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -172,11 +187,11 @@ export class MsgGrantPermissionRequest {
       }
     }
     return message;
-  }
+  },
 
   fromJSON(object: any): MsgGrantPermissionRequest {
     const message = {
-      ...this.base,
+      ...baseMsgGrantPermissionRequest,
     } as MsgGrantPermissionRequest;
     if (object.creator !== undefined && object.creator !== null) {
       message.creator = String(object.creator);
@@ -204,7 +219,7 @@ export class MsgGrantPermissionRequest {
       message.expirationTime = 0;
     }
     return message;
-  }
+  },
 
   toJSON(message: MsgGrantPermissionRequest): unknown {
     const obj: any = {};
@@ -214,11 +229,11 @@ export class MsgGrantPermissionRequest {
     message.signedMessage !== undefined && (obj.signedMessage = message.signedMessage);
     message.expirationTime !== undefined && (obj.expirationTime = message.expirationTime);
     return obj;
-  }
+  },
 
   fromPartial(object: DeepPartial<MsgGrantPermissionRequest>): MsgGrantPermissionRequest {
     const message = {
-      ...this.base,
+      ...baseMsgGrantPermissionRequest,
     } as MsgGrantPermissionRequest;
     if (object.creator !== undefined && object.creator !== null) {
       message.creator = object.creator;
@@ -246,17 +261,18 @@ export class MsgGrantPermissionRequest {
       message.expirationTime = 0;
     }
     return message;
-  }
-}
+  },
+};
 
-export class MsgRevokePermissionRequest {
-  creator: string;
-  granterEthAddress: string;
-  signature: string;
-  signedMessage: string;
+const baseMsgRevokePermissionRequest: object = {
+  creator: '',
+  granterEthAddress: '',
+  signature: '',
+  signedMessage: '',
+};
 
-  private base = { creator: '', granterEthAddress: '', signature: '', signedMessage: '' };
-
+export const MsgRevokePermissionRequest = {
+  typeUrl: '/dexilon_exchange.dexilonL2.registration.MsgRevokePermissionRequest',
   encode(message: MsgRevokePermissionRequest, writer: Writer = Writer.create()): Writer {
     if (message.creator !== '') {
       writer.uint32(10).string(message.creator);
@@ -271,13 +287,13 @@ export class MsgRevokePermissionRequest {
       writer.uint32(34).string(message.signedMessage);
     }
     return writer;
-  }
+  },
 
   decode(input: Reader | Uint8Array, length?: number): MsgRevokePermissionRequest {
     const reader = input instanceof Uint8Array ? new Reader(input) : input;
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = {
-      ...this.base,
+      ...baseMsgRevokePermissionRequest,
     } as MsgRevokePermissionRequest;
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -300,11 +316,11 @@ export class MsgRevokePermissionRequest {
       }
     }
     return message;
-  }
+  },
 
   fromJSON(object: any): MsgRevokePermissionRequest {
     const message = {
-      ...this.base,
+      ...baseMsgRevokePermissionRequest,
     } as MsgRevokePermissionRequest;
     if (object.creator !== undefined && object.creator !== null) {
       message.creator = String(object.creator);
@@ -327,7 +343,7 @@ export class MsgRevokePermissionRequest {
       message.signedMessage = '';
     }
     return message;
-  }
+  },
 
   toJSON(message: MsgRevokePermissionRequest): unknown {
     const obj: any = {};
@@ -336,11 +352,11 @@ export class MsgRevokePermissionRequest {
     message.signature !== undefined && (obj.signature = message.signature);
     message.signedMessage !== undefined && (obj.signedMessage = message.signedMessage);
     return obj;
-  }
+  },
 
   fromPartial(object: DeepPartial<MsgRevokePermissionRequest>): MsgRevokePermissionRequest {
     const message = {
-      ...this.base,
+      ...baseMsgRevokePermissionRequest,
     } as MsgRevokePermissionRequest;
     if (object.creator !== undefined && object.creator !== null) {
       message.creator = object.creator;
@@ -363,8 +379,46 @@ export class MsgRevokePermissionRequest {
       message.signedMessage = '';
     }
     return message;
-  }
-}
+  },
+};
+
+const baseMsgEmptyResponse: object = {};
+
+export const MsgEmptyResponse = {
+  encode(_: MsgEmptyResponse, writer: Writer = Writer.create()): Writer {
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgEmptyResponse {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseMsgEmptyResponse } as MsgEmptyResponse;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgEmptyResponse {
+    const message = { ...baseMsgEmptyResponse } as MsgEmptyResponse;
+    return message;
+  },
+
+  toJSON(_: MsgEmptyResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial(_: DeepPartial<MsgEmptyResponse>): MsgEmptyResponse {
+    const message = { ...baseMsgEmptyResponse } as MsgEmptyResponse;
+    return message;
+  },
+};
 
 function longToNumber(long: Long): number {
   if (long.gt(Number.MAX_SAFE_INTEGER)) {

@@ -9,7 +9,7 @@ export class DepositTradingBalanceRequest {
   balance: string;
   asset: string;
 
-  private base: object = {
+  private base = {
     accountAddress: '',
     balance: '',
     asset: '',
@@ -112,7 +112,7 @@ export class WithdrawTradingBalanceRequest {
   balance: string;
   asset: string;
 
-  private base: object = {
+  private base = {
     accountAddress: '',
     balance: '',
     asset: '',

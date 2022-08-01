@@ -54,24 +54,64 @@ export class DexilonClient {
   }
 
   async createAddressMapping(cosmosAddress: string, chainId: number, externalAddress: string): Promise<any> {
-    const txBodyFields: TxBodyEncodeObject = {
+    const txBodyFields = this.getTxBody(MsgCreateAddressMapping.typeUrl, {
+      creator: cosmosAddress,
+      chainId,
+      address: externalAddress,
+    });
+    const txRaw = await this.directSignCustomMsg(cosmosAddress, txBodyFields);
+
+    return await this.api.pushTx(txRaw);
+  }
+
+  async grantPermissions(
+    creator: string,
+    granterEthAddress: string,
+    signature: string,
+    signedMessage: string,
+    expirationTime: number,
+  ): Promise<any> {
+    const txBodyFields = this.getTxBody(MsgGrantPermissionRequest.typeUrl, {
+      creator,
+      granterEthAddress,
+      signature,
+      signedMessage,
+      expirationTime,
+    });
+    const txRaw = await this.directSignCustomMsg(creator, txBodyFields);
+
+    return await this.api.pushTx(txRaw);
+  }
+
+  async revokePermissions(
+    creator: string,
+    granterEthAddress: string,
+    signature: string,
+    signedMessage: string,
+  ): Promise<any> {
+    const txBodyFields = this.getTxBody(MsgRevokePermissionRequest.typeUrl, {
+      creator,
+      granterEthAddress,
+      signature,
+      signedMessage,
+    });
+    const txRaw = await this.directSignCustomMsg(creator, txBodyFields);
+
+    return await this.api.pushTx(txRaw);
+  }
+
+  private getTxBody(typeUrl: string, value: any): TxBodyEncodeObject {
+    return {
       typeUrl: '/cosmos.tx.v1beta1.TxBody',
       value: {
         messages: [
           {
-            typeUrl: MsgCreateAddressMapping.typeUrl,
-            value: {
-              creator: cosmosAddress,
-              chainId,
-              address: externalAddress,
-            },
+            typeUrl,
+            value,
           },
         ],
       },
     };
-    const txRaw = await this.directSignCustomMsg(cosmosAddress, txBodyFields);
-
-    return await this.api.pushTx(txRaw);
   }
 
   private async directSignCustomMsg(cosmosAddress: string, txBodyFields: TxBodyEncodeObject): Promise<Uint8Array> {

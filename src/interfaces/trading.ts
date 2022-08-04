@@ -2,19 +2,26 @@
 import { Reader, Writer } from 'protobufjs/minimal';
 import { DeepPartial } from './common';
 
-export const tradingModuleProtobufPackage = 'smartarbitrage.dexilonl2.trading';
-
-export class DepositTradingBalanceRequest {
+export interface DepositTradingBalanceRequest {
   accountAddress: string;
   balance: string;
   asset: string;
+}
 
-  private base = {
-    accountAddress: '',
-    balance: '',
-    asset: '',
-  };
+export interface WithdrawTradingBalanceRequest {
+  accountAddress: string;
+  balance: string;
+  asset: string;
+}
 
+const baseDepositTradingBalanceRequest: object = {
+  accountAddress: '',
+  balance: '',
+  asset: '',
+};
+
+export const DepositTradingBalanceRequest = {
+  typeUrl: '/dexilon_exchange.dexilonL2.trading.DepositTradingBalanceRequest',
   encode(message: DepositTradingBalanceRequest, writer: Writer = Writer.create()): Writer {
     if (message.accountAddress !== '') {
       writer.uint32(10).string(message.accountAddress);
@@ -26,13 +33,13 @@ export class DepositTradingBalanceRequest {
       writer.uint32(26).string(message.asset);
     }
     return writer;
-  }
+  },
 
   decode(input: Reader | Uint8Array, length?: number): DepositTradingBalanceRequest {
     const reader = input instanceof Uint8Array ? new Reader(input) : input;
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = {
-      ...this.base,
+      ...baseDepositTradingBalanceRequest,
     } as DepositTradingBalanceRequest;
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -52,11 +59,11 @@ export class DepositTradingBalanceRequest {
       }
     }
     return message;
-  }
+  },
 
   fromJSON(object: any): DepositTradingBalanceRequest {
     const message = {
-      ...this.base,
+      ...baseDepositTradingBalanceRequest,
     } as DepositTradingBalanceRequest;
     if (object.accountAddress !== undefined && object.accountAddress !== null) {
       message.accountAddress = String(object.accountAddress);
@@ -74,7 +81,7 @@ export class DepositTradingBalanceRequest {
       message.asset = '';
     }
     return message;
-  }
+  },
 
   toJSON(message: DepositTradingBalanceRequest): unknown {
     const obj: any = {};
@@ -82,11 +89,11 @@ export class DepositTradingBalanceRequest {
     message.balance !== undefined && (obj.balance = message.balance);
     message.asset !== undefined && (obj.asset = message.asset);
     return obj;
-  }
+  },
 
   fromPartial(object: DeepPartial<DepositTradingBalanceRequest>): DepositTradingBalanceRequest {
     const message = {
-      ...this.base,
+      ...baseDepositTradingBalanceRequest,
     } as DepositTradingBalanceRequest;
     if (object.accountAddress !== undefined && object.accountAddress !== null) {
       message.accountAddress = object.accountAddress;
@@ -104,19 +111,17 @@ export class DepositTradingBalanceRequest {
       message.asset = '';
     }
     return message;
-  }
-}
+  },
+};
 
-export class WithdrawTradingBalanceRequest {
-  accountAddress: string;
-  balance: string;
-  asset: string;
+const baseWithdrawTradingBalanceRequest: object = {
+  accountAddress: '',
+  balance: '',
+  asset: '',
+};
 
-  private base = {
-    accountAddress: '',
-    balance: '',
-    asset: '',
-  };
+export const WithdrawTradingBalanceRequest = {
+  typeUrl: '/dexilon_exchange.dexilonL2.trading.WithdrawTradingBalanceRequest',
 
   encode(message: WithdrawTradingBalanceRequest, writer: Writer = Writer.create()): Writer {
     if (message.accountAddress !== '') {
@@ -129,13 +134,13 @@ export class WithdrawTradingBalanceRequest {
       writer.uint32(26).string(message.asset);
     }
     return writer;
-  }
+  },
 
   decode(input: Reader | Uint8Array, length?: number): WithdrawTradingBalanceRequest {
     const reader = input instanceof Uint8Array ? new Reader(input) : input;
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = {
-      ...this.base,
+      ...baseWithdrawTradingBalanceRequest,
     } as WithdrawTradingBalanceRequest;
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -155,11 +160,11 @@ export class WithdrawTradingBalanceRequest {
       }
     }
     return message;
-  }
+  },
 
   fromJSON(object: any): WithdrawTradingBalanceRequest {
     const message = {
-      ...this.base,
+      ...baseWithdrawTradingBalanceRequest,
     } as WithdrawTradingBalanceRequest;
     if (object.accountAddress !== undefined && object.accountAddress !== null) {
       message.accountAddress = String(object.accountAddress);
@@ -177,7 +182,7 @@ export class WithdrawTradingBalanceRequest {
       message.asset = '';
     }
     return message;
-  }
+  },
 
   toJSON(message: WithdrawTradingBalanceRequest): unknown {
     const obj: any = {};
@@ -185,11 +190,11 @@ export class WithdrawTradingBalanceRequest {
     message.balance !== undefined && (obj.balance = message.balance);
     message.asset !== undefined && (obj.asset = message.asset);
     return obj;
-  }
+  },
 
   fromPartial(object: DeepPartial<WithdrawTradingBalanceRequest>): WithdrawTradingBalanceRequest {
     const message = {
-      ...this.base,
+      ...baseWithdrawTradingBalanceRequest,
     } as WithdrawTradingBalanceRequest;
     if (object.accountAddress !== undefined && object.accountAddress !== null) {
       message.accountAddress = object.accountAddress;
@@ -207,5 +212,5 @@ export class WithdrawTradingBalanceRequest {
       message.asset = '';
     }
     return message;
-  }
-}
+  },
+};

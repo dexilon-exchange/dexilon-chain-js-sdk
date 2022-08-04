@@ -2,21 +2,22 @@
 import { Reader, Writer } from 'protobufjs/minimal';
 import { DeepPartial } from './common';
 
-export const protobufPackage = 'smartarbitrage.dexilonl2.withdraw';
-
-export class MsgWithdrawTransaction {
+export const protobufPackage = 'smartarbitrage.dexilonL2.withdraw';
+export interface MsgWithdrawTransaction {
   creator: string;
   denom: string;
   amount: string;
   chainId: number;
+}
 
-  private base = {
-    creator: '',
-    denom: '',
-    amount: '',
-    chainId: 0,
-  };
+const baseMsgWithdrawTransaction: object = {
+  creator: '',
+  denom: '',
+  amount: '',
+  chainId: 0,
+};
 
+export const MsgWithdrawTransaction = {
   encode(message: MsgWithdrawTransaction, writer: Writer = Writer.create()): Writer {
     if (message.creator !== '') {
       writer.uint32(10).string(message.creator);
@@ -31,12 +32,12 @@ export class MsgWithdrawTransaction {
       writer.uint32(32).int32(message.chainId);
     }
     return writer;
-  }
+  },
 
   decode(input: Reader | Uint8Array, length?: number): MsgWithdrawTransaction {
     const reader = input instanceof Uint8Array ? new Reader(input) : input;
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...this.base } as MsgWithdrawTransaction;
+    const message = { ...baseMsgWithdrawTransaction } as MsgWithdrawTransaction;
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -58,10 +59,10 @@ export class MsgWithdrawTransaction {
       }
     }
     return message;
-  }
+  },
 
   fromJSON(object: any): MsgWithdrawTransaction {
-    const message = { ...this.base } as MsgWithdrawTransaction;
+    const message = { ...baseMsgWithdrawTransaction } as MsgWithdrawTransaction;
     if (object.creator !== undefined && object.creator !== null) {
       message.creator = String(object.creator);
     } else {
@@ -83,7 +84,7 @@ export class MsgWithdrawTransaction {
       message.chainId = 0;
     }
     return message;
-  }
+  },
 
   toJSON(message: MsgWithdrawTransaction): unknown {
     const obj: any = {};
@@ -92,10 +93,10 @@ export class MsgWithdrawTransaction {
     message.amount !== undefined && (obj.amount = message.amount);
     message.chainId !== undefined && (obj.chainId = message.chainId);
     return obj;
-  }
+  },
 
   fromPartial(object: DeepPartial<MsgWithdrawTransaction>): MsgWithdrawTransaction {
-    const message = { ...this.base } as MsgWithdrawTransaction;
+    const message = { ...baseMsgWithdrawTransaction } as MsgWithdrawTransaction;
     if (object.creator !== undefined && object.creator !== null) {
       message.creator = object.creator;
     } else {
@@ -117,5 +118,5 @@ export class MsgWithdrawTransaction {
       message.chainId = 0;
     }
     return message;
-  }
-}
+  },
+};

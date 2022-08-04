@@ -7,6 +7,7 @@ import {
 } from './interfaces/blockchain-api.dto';
 
 const PUSH_TX_ROUTE = '/cosmos/tx/v1beta1/txs';
+const FAUCET_ROUTE = '/faucet';
 const ACCOUNT_INFO_ROUTE = '/cosmos/auth/v1beta1/accounts/';
 
 export class BlockchainAPI {
@@ -35,6 +36,19 @@ export class BlockchainAPI {
       };
 
       const { data: resp } = await axios.post(`${this.url}${PUSH_TX_ROUTE}`, data);
+      return resp;
+    } catch (err: any) {
+      throw this.handleAxiosError(err);
+    }
+  }
+
+  async faucet(address: string) {
+    try {
+      const data = {
+        address,
+      };
+
+      const { data: resp } = await axios.post(`${this.url}${FAUCET_ROUTE}`, data);
       return resp;
     } catch (err: any) {
       throw this.handleAxiosError(err);

@@ -25,7 +25,8 @@ import {
 import { fromBase64, toBase64 } from '@cosmjs/encoding';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { PushTxResponseDTO } from './interfaces/blockchain-api.dto';
-import { DepositTradingBalanceRequest } from './interfaces/trading';
+import { DepositTradingBalanceRequest, WithdrawTradingBalanceRequest } from './interfaces/trading';
+import { MsgWithdrawTransaction } from './interfaces/withdraw';
 
 const defaultSigningClientOptions: SigningStargateClientOptions = {
   broadcastPollIntervalMs: 300,
@@ -51,7 +52,6 @@ export class DexilonClient {
     registry.register(MsgGrantPermissionRequest.typeUrl, MsgGrantPermissionRequest);
     registry.register(MsgRevokePermissionRequest.typeUrl, MsgRevokePermissionRequest);
 
-    console.log(registry);
     const options = { ...defaultSigningClientOptions, registry: registry };
     this.client = await SigningStargateClient.offline(this.wallet, options);
     this.from = (await this.wallet.getAccounts())[0].address;
@@ -118,8 +118,7 @@ export class DexilonClient {
   async depositTrading(granter: string, balance: string, asset: string): Promise<any> {
     const grantee = this.from;
 
-    // The Custom Module Message that the grantee needs to execute
-    const txDepositTradingMessage = {
+    const msg = {
       typeUrl: DepositTradingBalanceRequest.typeUrl,
       value: DepositTradingBalanceRequest.encode(
         DepositTradingBalanceRequest.fromPartial({
@@ -130,7 +129,44 @@ export class DexilonClient {
       ).finish(),
     };
 
-    return await this.authzWrapAndPushTx(grantee, [txDepositTradingMessage]);
+    return await this.authzWrapAndPushTx(grantee, [msg]);
+  }
+
+  async withdrawTrading(granter: string, balance: string, asset: string): Promise<any> {
+    const grantee = this.from;
+
+    // The Custom Module Message that the grantee needs to execute
+    const msg = {
+      typeUrl: WithdrawTradingBalanceRequest.typeUrl,
+      value: WithdrawTradingBalanceRequest.encode(
+        WithdrawTradingBalanceRequest.fromPartial({
+          accountAddress: granter,
+          balance,
+          asset,
+        }),
+      ).finish(),
+    };
+
+    return await this.authzWrapAndPushTx(grantee, [msg]);
+  }
+
+  async withdraw(granter: string, denom: string, amount: string, chainId: number): Promise<any> {
+    const grantee = this.from;
+
+    // The Custom Module Message that the grantee needs to execute
+    const msg = {
+      typeUrl: MsgWithdrawTransaction.typeUrl,
+      value: MsgWithdrawTransaction.encode(
+        MsgWithdrawTransaction.fromPartial({
+          creator: granter,
+          denom,
+          amount,
+          chainId,
+        }),
+      ).finish(),
+    };
+
+    return await this.authzWrapAndPushTx(grantee, [msg]);
   }
 
   private async authzWrapAndPushTx(grantee: string, msgs: any[]) {
@@ -145,13 +181,13 @@ export class DexilonClient {
     const { account_number: accountNumber, sequence } = (await this.api.getAccountInfo(grantee))!
       .account;
 
-    const defaultGasPrice = GasPrice.fromString('0stake');
+    const defaultGasPrice = GasPrice.fromString(`0${this.bondDenom}`);
     const defaultSendFee: StdFee = calculateFee(200000, defaultGasPrice);
 
     const txRaw = await this.client.sign(grantee, [txAuthMessage], defaultSendFee, '', {
       accountNumber: parseInt(accountNumber),
       sequence: parseInt(sequence),
-      chainId: 'dexilonL2',
+      chainId: this.config.chainId,
     });
 
     const txBytes = TxRaw.encode(txRaw).finish();

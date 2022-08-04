@@ -18,6 +18,8 @@ const baseMsgWithdrawTransaction: object = {
 };
 
 export const MsgWithdrawTransaction = {
+  typeUrl: '/dexilon_exchange.dexilonL2.withdraw.MsgWithdrawTransaction',
+
   encode(message: MsgWithdrawTransaction, writer: Writer = Writer.create()): Writer {
     if (message.creator !== '') {
       writer.uint32(10).string(message.creator);

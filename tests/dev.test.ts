@@ -11,7 +11,7 @@ import {
   randomInteger,
 } from './testUtils/randomizer';
 
-describe('registration', () => {
+describe('full workflow test', () => {
   let granterClient: DexilonClient;
   let granteeClient: DexilonClient;
   let ethNetwork: number;
@@ -47,29 +47,31 @@ describe('registration', () => {
     ethAddress = etherWallet.address;
   });
 
-  describe('createAddressMapping::constructive', () => {
-    it('works', async () => {
-      const res = await granterClient.createAddressMapping(ethNetwork, ethAddress);
+  describe('registration', () => {
+    describe('createAddressMapping::constructive', () => {
+      it('works', async () => {
+        const res = await granterClient.createAddressMapping(ethNetwork, ethAddress);
 
-      expect(res.tx_response.code).toBe(0);
-      expect(res.tx_response.txhash).toBeTruthy();
-      expect(res.tx_response.txhash.length).not.toBe(0);
+        expect(res.tx_response.code).toBe(0);
+        expect(res.tx_response.txhash).toBeTruthy();
+        expect(res.tx_response.txhash.length).not.toBe(0);
+      });
+    });
+
+    xdescribe('createAddressMapping::destructive', () => {
+      it('fails on :: mapping exists', async () => {
+        await delay(2000);
+        const res = await granterClient.createAddressMapping(ethNetwork, ethAddress);
+        console.log(res);
+        expect(res.tx_response.code).not.toBe(0);
+        expect(res.tx_response.code).toBe(19);
+      }, 10000);
     });
   });
 
-  xdescribe('createAddressMapping::distructive', () => {
-    it('fails on :: mapping exists', async () => {
-      await delay(2000);
-      const res = await granterClient.createAddressMapping(ethNetwork, ethAddress);
-      console.log(res);
-      expect(res.tx_response.code).not.toBe(0);
-      expect(res.tx_response.code).toBe(19);
-    }, 10000);
-  });
-
-  describe('grantPermissions::constructive', () => {
+  describe('grantPermissions', () => {
     it('works', async () => {
-      await delay(1000);
+      await delay(2000);
       const dataStructure = ['string'];
       const signedMessage = granteeWallet.address;
       const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
@@ -88,13 +90,57 @@ describe('registration', () => {
     });
   });
 
-  describe('depositTrading::constructive', () => {
-    it('works', async () => {
-      await delay(1000);
+  describe('Trading Module', () => {
+    describe('deposit', () => {
+      it('works', async () => {
+        await delay(2000);
 
-      const balance = '1';
-      const asset = 'usdc';
-      const res = await granteeClient.depositTrading(granterWallet.address, balance, asset);
+        const balance = '1';
+        const asset = 'usdc';
+        const res = await granteeClient.depositTrading(granterWallet.address, balance, asset);
+        console.log(res);
+
+        expect(res.tx_response.code).toBe(0);
+      });
+    });
+
+    describe('withdraw', () => {
+      it('works', async () => {
+        await delay(2000);
+
+        const balance = '1';
+        const asset = 'usdc';
+        const res = await granteeClient.withdrawTrading(granterWallet.address, balance, asset);
+        console.log(res);
+
+        expect(res.tx_response.code).toBe(0);
+      });
+    });
+  });
+
+  describe('WithdrawModule', () => {
+    it('works', async () => {
+      await delay(2000);
+
+      const amount = '1';
+      const denom = 'usdc';
+      const chainId = ethNetwork;
+      const res = await granteeClient.withdraw(granterWallet.address, denom, amount, chainId);
+      console.log(res);
+
+      expect(res.tx_response.code).toBe(0);
+    });
+  });
+
+  describe('revokePermissions', () => {
+    it('works', async () => {
+      await delay(2000);
+      const dataStructure = ['string'];
+      const signedMessage = granteeWallet.address;
+      const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
+
+      const res = await granterClient.revokePermissions(ethAddress, granterSinature, signedMessage);
+
       console.log(res);
 
       expect(res.tx_response.code).toBe(0);

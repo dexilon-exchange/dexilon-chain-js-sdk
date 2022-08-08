@@ -28,6 +28,7 @@ describe('full workflow test', () => {
     const api = new BlockchainAPI('localhost', 3312);
 
     await api.faucet(granterWallet.address);
+    await api.faucet(granteeWallet.address);
 
     const config: Config = {
       blockchainApiHost: 'localhost',
@@ -77,7 +78,7 @@ describe('full workflow test', () => {
       const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
 
       const expirationTime = 15 * 60;
-      const res = await granterClient.grantPermissions(
+      const res = await granteeClient.grantPermissions(
         ethAddress,
         granterSinature,
         signedMessage,

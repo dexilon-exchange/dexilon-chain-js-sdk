@@ -1,7 +1,10 @@
-# compiled output
-/dist
-/build
-/node_modules
+# sources 
+/tests
+
+.prettierrc
+jest.config.js
+tsconfig.json
+tsconfig.build.json
 
 # Logs
 logs

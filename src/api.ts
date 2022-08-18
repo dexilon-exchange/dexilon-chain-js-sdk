@@ -19,7 +19,9 @@ export class BlockchainAPI {
 
   async getAccountInfo(cosmosAddress: string): Promise<AccountInfoResponseDTO> {
     try {
-      const { data } = await axios.get<string, any>(`${this.url}${ACCOUNT_INFO_ROUTE}${cosmosAddress}`);
+      const { data } = await axios.get<string, any>(
+        `${this.url}${ACCOUNT_INFO_ROUTE}${cosmosAddress}`,
+      );
       return data;
     } catch (err: any) {
       throw this.handleAxiosError(err);
@@ -48,7 +50,9 @@ export class BlockchainAPI {
         address,
       };
 
-      const { data: resp } = await axios.post(`${this.url}${FAUCET_ROUTE}`, data);
+      const { data: resp } = await axios.post(`${this.url}${FAUCET_ROUTE}`, data, {
+        timeout: 10000,
+      });
       return resp;
     } catch (err: any) {
       throw this.handleAxiosError(err);
@@ -56,6 +60,10 @@ export class BlockchainAPI {
   }
 
   handleAxiosError(error: AxiosError) {
-    return error.response?.data;
+    if (error.response?.data) {
+      throw error.response?.data;
+    } else {
+      throw error;
+    }
   }
 }

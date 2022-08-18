@@ -26,7 +26,6 @@ describe('full workflow test', () => {
 
     console.log({ granter: granterWallet.address, grantee: granteeWallet.address });
     const api = new BlockchainAPI('localhost', 3312);
-
     await api.faucet(granterWallet.address);
     await api.faucet(granteeWallet.address);
 
@@ -52,7 +51,7 @@ describe('full workflow test', () => {
     describe('createAddressMapping::constructive', () => {
       it('works', async () => {
         const res = await granterClient.createAddressMapping(ethNetwork, ethAddress);
-
+        console.log(res);
         expect(res.tx_response.code).toBe(0);
         expect(res.tx_response.txhash).toBeTruthy();
         expect(res.tx_response.txhash.length).not.toBe(0);
@@ -74,7 +73,8 @@ describe('full workflow test', () => {
     it('works', async () => {
       await delay(2000);
       const dataStructure = ['string'];
-      const signedMessage = granteeWallet.address;
+      const timestamp = Math.floor((new Date().getTime() + 3 * 60 * 1000) / 1000.0);
+      const signedMessage = `${timestamp}#${granteeWallet.address}`;
       const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
 
       const expirationTime = 15 * 60;
@@ -137,7 +137,9 @@ describe('full workflow test', () => {
     it('works', async () => {
       await delay(2000);
       const dataStructure = ['string'];
-      const signedMessage = granteeWallet.address;
+      const timestamp = Math.floor((new Date().getTime() + 3 * 60 * 1000) / 1000.0);
+
+      const signedMessage = `${timestamp}#${granteeWallet.address}`;
       const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
 
       const res = await granterClient.revokePermissions(ethAddress, granterSinature, signedMessage);

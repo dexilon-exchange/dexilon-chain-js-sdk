@@ -65,12 +65,19 @@ export class DexilonClient {
     return this.config.chainId;
   }
 
-  async createAddressMapping(chainId: number, externalAddress: string): Promise<PushTxResponseDTO> {
+  async createAddressMapping(
+    chainId: number,
+    externalAddress: string,
+    signedMessage: string,
+    signature: string,
+  ): Promise<PushTxResponseDTO> {
     const cosmosAddress = this.from;
     const txBodyFields = this.getTxBody(MsgCreateAddressMapping.typeUrl, {
       creator: cosmosAddress,
       chainId,
       address: externalAddress,
+      signedMessage,
+      signature,
     });
     const txRaw = await this.directSignCustomMsg(cosmosAddress, txBodyFields);
 

@@ -8,7 +8,7 @@
   "repository": "https://github.com/dexilon-exchange/dexilon-chain-js-sdk.git",
   "scripts": {
     "build": "rm -rf build && tsc",
-    "test": "jest --runInBand --silent"
+    "test": "jest --runInBand"
   },
   "types": "build/index.d.ts",
   "main": "build/index.js",

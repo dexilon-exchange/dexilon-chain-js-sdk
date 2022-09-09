@@ -34,7 +34,7 @@ export class BlockchainAPI {
 
       const data: PushTxRequestDTO = {
         tx_bytes: b64encoded,
-        mode: BroadcastMode.BROADCAST_MODE_SYNC,
+        mode: BroadcastMode.BROADCAST_MODE_BLOCK,
       };
 
       const { data: resp } = await axios.post(`${this.url}${PUSH_TX_ROUTE}`, data);

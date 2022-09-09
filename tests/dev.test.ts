@@ -50,7 +50,15 @@ describe('full workflow test', () => {
   describe('registration', () => {
     describe('createAddressMapping::constructive', () => {
       it('works', async () => {
-        const res = await granterClient.createAddressMapping(ethNetwork, ethAddress);
+        const signedMessage = `${granterWallet.address}`;
+        const dataStructure = ['string'];
+        const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
+        const res = await granterClient.createAddressMapping(
+          ethNetwork,
+          ethAddress,
+          signedMessage,
+          granterSinature,
+        );
         console.log(res);
         expect(res.tx_response.code).toBe(0);
         expect(res.tx_response.txhash).toBeTruthy();
@@ -58,17 +66,17 @@ describe('full workflow test', () => {
       });
     });
 
-    xdescribe('createAddressMapping::destructive', () => {
-      it('fails on :: mapping exists', async () => {
-        await delay(2000);
-        const res = await granterClient.createAddressMapping(ethNetwork, ethAddress);
-        console.log(res);
-        expect(res.tx_response.code).not.toBe(0);
-        expect(res.tx_response.code).toBe(19);
-      }, 10000);
-    });
+    // xdescribe('createAddressMapping::destructive', () => {
+    //   it('fails on :: mapping exists', async () => {
+    //     await delay(2000);
+    //     const res = await granterClient.createAddressMapping(ethNetwork, ethAddress);
+    //     console.log(res);
+    //     expect(res.tx_response.code).not.toBe(0);
+    //     expect(res.tx_response.code).toBe(19);
+    //   }, 10000);
+    // });
   });
-
+  // return;
   describe('grantPermissions', () => {
     it('works', async () => {
       await delay(2000);

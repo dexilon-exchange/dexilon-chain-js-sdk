@@ -9,6 +9,8 @@ export interface MsgCreateAddressMapping {
   creator: string;
   chainId: number;
   address: string;
+  signature: string;
+  signedMessage: string;
 }
 
 export interface MsgGrantPermissionRequest {
@@ -32,6 +34,8 @@ const baseMsgCreateAddressMapping: object = {
   creator: '',
   chainId: 0,
   address: '',
+  signature: '',
+  signedMessage: '',
 };
 
 export const MsgCreateAddressMapping = {
@@ -45,6 +49,12 @@ export const MsgCreateAddressMapping = {
     }
     if (message.address !== '') {
       writer.uint32(26).string(message.address);
+    }
+    if (message.signature !== '') {
+      writer.uint32(34).string(message.signature);
+    }
+    if (message.signedMessage !== '') {
+      writer.uint32(42).string(message.signedMessage);
     }
     return writer;
   },
@@ -66,6 +76,12 @@ export const MsgCreateAddressMapping = {
           break;
         case 3:
           message.address = reader.string();
+          break;
+        case 4:
+          message.signature = reader.string();
+          break;
+        case 5:
+          message.signedMessage = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -94,6 +110,16 @@ export const MsgCreateAddressMapping = {
     } else {
       message.address = '';
     }
+    if (object.signature !== undefined && object.signature !== null) {
+      message.signature = String(object.signature);
+    } else {
+      message.signature = '';
+    }
+    if (object.signedMessage !== undefined && object.signedMessage !== null) {
+      message.signedMessage = String(object.signedMessage);
+    } else {
+      message.signedMessage = '';
+    }
     return message;
   },
 
@@ -102,6 +128,8 @@ export const MsgCreateAddressMapping = {
     message.creator !== undefined && (obj.creator = message.creator);
     message.chainId !== undefined && (obj.chainId = message.chainId);
     message.address !== undefined && (obj.address = message.address);
+    message.signature !== undefined && (obj.signature = message.signature);
+    message.signedMessage !== undefined && (obj.signedMessage = message.signedMessage);
     return obj;
   },
 
@@ -123,6 +151,16 @@ export const MsgCreateAddressMapping = {
       message.address = object.address;
     } else {
       message.address = '';
+    }
+    if (object.signature !== undefined && object.signature !== null) {
+      message.signature = object.signature;
+    } else {
+      message.signature = '';
+    }
+    if (object.signedMessage !== undefined && object.signedMessage !== null) {
+      message.signedMessage = object.signedMessage;
+    } else {
+      message.signedMessage = '';
     }
     return message;
   },

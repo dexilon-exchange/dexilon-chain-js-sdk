@@ -1,6 +1,6 @@
 {
   "name": "@dexilon-exchange/dexilon-chain-js-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/dexilon-exchange"

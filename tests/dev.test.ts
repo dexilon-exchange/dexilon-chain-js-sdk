@@ -25,9 +25,6 @@ describe('full workflow test', () => {
     granteeWallet = await getRandomCosmosAddress();
 
     console.log({ granter: granterWallet.address, grantee: granteeWallet.address });
-    const api = new BlockchainAPI('localhost', 3312);
-    await api.faucet(granterWallet.address);
-    await api.faucet(granteeWallet.address);
 
     const config: Config = {
       blockchainApiHost: 'localhost',
@@ -35,6 +32,10 @@ describe('full workflow test', () => {
       chainId: 'dexilonL2',
       bondDenom: 'stake',
     };
+
+    const api = new BlockchainAPI(config);
+    await api.faucet(granterWallet.address);
+    await api.faucet(granteeWallet.address);
 
     granterClient = new DexilonClient(granterWallet.wallet, api, config);
     await granterClient.init();

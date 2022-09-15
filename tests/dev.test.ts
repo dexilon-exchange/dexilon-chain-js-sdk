@@ -33,6 +33,13 @@ describe('full workflow test', () => {
       bondDenom: 'stake',
     };
 
+    // const config: Config = {
+    //   blockchainApiHost: '88.198.205.192',
+    //   blockchainApiPort: 4000,
+    //   chainId: 'dexilon-testnet',
+    //   bondDenom: 'dxln',
+    // };
+
     const api = new BlockchainAPI(config);
     await api.faucet(granterWallet.address);
     await api.faucet(granteeWallet.address);
@@ -99,7 +106,7 @@ describe('full workflow test', () => {
       expect(res.tx_response.code).toBe(0);
     });
   });
-
+// return;
   describe('Trading Module', () => {
     describe('deposit', () => {
       it('works', async () => {
@@ -113,26 +120,13 @@ describe('full workflow test', () => {
         expect(res.tx_response.code).toBe(0);
       });
     });
-
-    describe('withdraw', () => {
-      it('works', async () => {
-        await delay(2000);
-
-        const balance = '1';
-        const asset = 'usdc';
-        const res = await granteeClient.withdrawTrading(granterWallet.address, balance, asset);
-        console.log(res);
-
-        expect(res.tx_response.code).toBe(0);
-      });
-    });
   });
 
   describe('WithdrawModule', () => {
     it('works', async () => {
       await delay(2000);
 
-      const amount = '1';
+      const amount = '1000000000000';
       const denom = 'usdc';
       const chainId = ethNetwork;
       const res = await granteeClient.withdraw(granterWallet.address, denom, amount, chainId);

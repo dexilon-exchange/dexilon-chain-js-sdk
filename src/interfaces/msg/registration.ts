@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { Reader, util, configure, Writer } from 'protobufjs/minimal';
 import Long from 'long';
-import { DeepPartial } from './common';
+import { DeepPartial } from '../common/common';
 
 export const protobufPackage = 'dexilon_exchange.dexilonL2.registration';
 

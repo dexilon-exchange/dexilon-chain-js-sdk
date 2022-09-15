@@ -1,8 +1,8 @@
 /* eslint-disable */
 import { Reader, util, configure, Writer } from 'protobufjs/minimal';
 import Long from 'long';
-import { Coin } from './coin';
-import { DeepPartial, longToNumber } from './common';
+import { Coin } from '../common/coin';
+import { DeepPartial, longToNumber } from '../common/common';
 
 export const protobufPackage = 'dexilon_exchange.dexilonL2.liquidity';
 

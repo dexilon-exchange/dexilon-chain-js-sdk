@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { Reader, Writer } from 'protobufjs/minimal';
-import { DeepPartial } from './common';
+import { DeepPartial } from '../common/common';
 
 export interface DepositTradingBalanceRequest {
   accountAddress: string;

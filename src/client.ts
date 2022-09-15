@@ -11,7 +11,7 @@ import {
   MsgCreateAddressMapping,
   MsgGrantPermissionRequest,
   MsgRevokePermissionRequest,
-} from './interfaces/registration';
+} from './interfaces/msg/registration';
 import { BlockchainAPI } from './api';
 import {
   coins,
@@ -24,9 +24,11 @@ import {
 } from '@cosmjs/proto-signing';
 import { fromBase64, toBase64 } from '@cosmjs/encoding';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { PushTxResponseDTO } from './interfaces/blockchain-api.dto';
-import { DepositTradingBalanceRequest, WithdrawTradingBalanceRequest } from './interfaces/trading';
-import { MsgWithdrawTransaction } from './interfaces/withdraw';
+import { PushTxRequestDTO, PushTxResponseDTO } from './interfaces/blockchain-api.dto';
+import { DepositTradingBalanceRequest, WithdrawTradingBalanceRequest } from './interfaces/msg/trading';
+import { MsgWithdrawTransaction } from './interfaces/msg/withdraw';
+import { MsgDepositWithinBatch, MsgSwapWithinBatch, MsgWithdrawWithinBatch } from './interfaces/msg/liquidity';
+import { BroadcastMode, TxOptions } from './interfaces/common/client';
 
 const defaultSigningClientOptions: SigningStargateClientOptions = {
   broadcastPollIntervalMs: 300,
@@ -51,6 +53,9 @@ export class DexilonClient {
     registry.register(MsgCreateAddressMapping.typeUrl, MsgCreateAddressMapping);
     registry.register(MsgGrantPermissionRequest.typeUrl, MsgGrantPermissionRequest);
     registry.register(MsgRevokePermissionRequest.typeUrl, MsgRevokePermissionRequest);
+    registry.register(MsgDepositWithinBatch.typeUrl, MsgDepositWithinBatch);
+    registry.register(MsgSwapWithinBatch.typeUrl, MsgSwapWithinBatch);
+    registry.register(MsgWithdrawWithinBatch.typeUrl, MsgWithdrawWithinBatch);
 
     const options = { ...defaultSigningClientOptions, registry: registry };
     this.client = await SigningStargateClient.offline(this.wallet, options);
@@ -70,6 +75,7 @@ export class DexilonClient {
     externalAddress: string,
     signedMessage: string,
     signature: string,
+    options?: TxOptions,
   ): Promise<PushTxResponseDTO> {
     const cosmosAddress = this.from;
     const txBodyFields = this.getTxBody(MsgCreateAddressMapping.typeUrl, {
@@ -81,7 +87,7 @@ export class DexilonClient {
     });
     const txRaw = await this.directSignCustomMsg(cosmosAddress, txBodyFields);
 
-    return await this.api.pushTx(txRaw);
+    return await this.pushTx(txRaw, options);
   }
 
   async grantPermissions(
@@ -89,6 +95,7 @@ export class DexilonClient {
     signature: string,
     signedMessage: string,
     expirationTime: number,
+    options?: TxOptions,
   ): Promise<any> {
     const creator = this.from;
 
@@ -101,13 +108,14 @@ export class DexilonClient {
     });
     const txRaw = await this.directSignCustomMsg(creator, txBodyFields);
 
-    return await this.api.pushTx(txRaw);
+    return await this.pushTx(txRaw, options);
   }
 
   async revokePermissions(
     granterEthAddress: string,
     signature: string,
     signedMessage: string,
+    options?: TxOptions,
   ): Promise<any> {
     const creator = this.from;
 
@@ -119,10 +127,10 @@ export class DexilonClient {
     });
     const txRaw = await this.directSignCustomMsg(creator, txBodyFields);
 
-    return await this.api.pushTx(txRaw);
+    return await this.pushTx(txRaw, options);
   }
 
-  async depositTrading(granter: string, balance: string, asset: string): Promise<any> {
+  async depositTrading(granter: string, balance: string, asset: string, options?: TxOptions): Promise<any> {
     const grantee = this.from;
 
     const msg = {
@@ -136,10 +144,10 @@ export class DexilonClient {
       ).finish(),
     };
 
-    return await this.authzWrapAndPushTx(grantee, [msg]);
+    return await this.authzWrapAndPushTx(grantee, [msg], options);
   }
 
-  async withdrawTrading(granter: string, balance: string, asset: string): Promise<any> {
+  async withdrawTrading(granter: string, balance: string, asset: string, options?: TxOptions): Promise<any> {
     const grantee = this.from;
 
     // The Custom Module Message that the grantee needs to execute
@@ -154,10 +162,10 @@ export class DexilonClient {
       ).finish(),
     };
 
-    return await this.authzWrapAndPushTx(grantee, [msg]);
+    return await this.authzWrapAndPushTx(grantee, [msg], options);
   }
 
-  async withdraw(granter: string, denom: string, amount: string, chainId: number): Promise<any> {
+  async withdraw(granter: string, denom: string, amount: string, chainId: number, options?: TxOptions): Promise<any> {
     const grantee = this.from;
 
     // The Custom Module Message that the grantee needs to execute
@@ -173,10 +181,10 @@ export class DexilonClient {
       ).finish(),
     };
 
-    return await this.authzWrapAndPushTx(grantee, [msg]);
+    return await this.authzWrapAndPushTx(grantee, [msg], options);
   }
 
-  private async authzWrapAndPushTx(grantee: string, msgs: any[]) {
+  private async authzWrapAndPushTx(grantee: string, msgs: any[], options?: TxOptions) {
     const txAuthMessage = {
       typeUrl: '/cosmos.authz.v1beta1.MsgExec',
       value: {
@@ -185,8 +193,7 @@ export class DexilonClient {
       },
     };
 
-    const { account_number: accountNumber, sequence } = (await this.api.getAccountInfo(grantee))!
-      .account;
+    const { account_number: accountNumber, sequence } = (await this.api.getAccountInfo(grantee))!.account;
 
     const defaultGasPrice = GasPrice.fromString(`0${this.bondDenom}`);
     const defaultSendFee: StdFee = calculateFee(200000, defaultGasPrice);
@@ -199,7 +206,7 @@ export class DexilonClient {
 
     const txBytes = TxRaw.encode(txRaw).finish();
 
-    return await this.api.pushTx(txBytes);
+    return await this.pushTx(txBytes, options);
   }
 
   private getTxBody(typeUrl: string, value: any): TxBodyEncodeObject {
@@ -216,10 +223,7 @@ export class DexilonClient {
     };
   }
 
-  private async directSignCustomMsg(
-    cosmosAddress: string,
-    txBodyFields: TxBodyEncodeObject,
-  ): Promise<Uint8Array> {
+  private async directSignCustomMsg(cosmosAddress: string, txBodyFields: TxBodyEncodeObject): Promise<Uint8Array> {
     const [{ address: alice, pubkey: pubkeyBytes }] = await this.wallet.getAccounts();
     const pubkey = encodePubkey({
       type: 'tendermint/PubKeySecp256k1',
@@ -230,16 +234,10 @@ export class DexilonClient {
     registry.register(MsgCreateAddressMapping.typeUrl, MsgCreateAddressMapping);
 
     const txBodyBytes = registry.encode(txBodyFields);
-    const { account_number: accountNumber, sequence } = (await this.api.getAccountInfo(
-      cosmosAddress,
-    ))!.account;
+    const { account_number: accountNumber, sequence } = (await this.api.getAccountInfo(cosmosAddress))!.account;
     const feeAmount = coins(0, this.bondDenom);
     const gasLimit = 200000;
-    const authInfoBytes = makeAuthInfoBytes(
-      [{ pubkey, sequence: parseInt(sequence) }],
-      feeAmount,
-      gasLimit,
-    );
+    const authInfoBytes = makeAuthInfoBytes([{ pubkey, sequence: parseInt(sequence) }], feeAmount, gasLimit);
 
     const chainId = this.chainId;
     const signDoc = makeSignDoc(txBodyBytes, authInfoBytes, chainId, parseInt(accountNumber));
@@ -253,5 +251,15 @@ export class DexilonClient {
 
     const txRawBytes = Uint8Array.from(TxRaw.encode(txRaw).finish());
     return txRawBytes;
+  }
+
+  private async pushTx(txRaw: Uint8Array, options: TxOptions) {
+    const b64encoded = Buffer.from(txRaw).toString('base64');
+
+    const data: PushTxRequestDTO = {
+      tx_bytes: b64encoded,
+      mode: options?.mode ? options.mode : BroadcastMode.BROADCAST_MODE_BLOCK,
+    };
+    return await this.api.pushTx(data);
   }
 }

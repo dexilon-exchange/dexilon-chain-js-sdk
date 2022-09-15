@@ -1,6 +1,8 @@
+import { BroadcastMode } from './common/client';
+
 export class PushTxRequestDTO {
-  tx_bytes: string;
-  mode: BroadcastMode;
+  tx_bytes!: string;
+  mode!: BroadcastMode;
 }
 
 export class PushTxResponseDTO {
@@ -19,11 +21,6 @@ export class PushTxResponseDTO {
     timestamp: string;
     events: Array<any>;
   };
-}
-
-export enum BroadcastMode {
-  BROADCAST_MODE_SYNC = 'BROADCAST_MODE_SYNC',
-  BROADCAST_MODE_BLOCK = 'BROADCAST_MODE_BLOCK',
 }
 
 export class AccountInfoResponseDTO {

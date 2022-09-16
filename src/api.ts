@@ -1,6 +1,12 @@
 import axios, { AxiosError } from 'axios';
-import { ACCOUNT_INFO_ROUTE, PUSH_TX_ROUTE, FAUCET_ROUTE } from './interfaces/query/routes';
-import { AccountInfoResponseDTO, PushTxRequestDTO, PushTxResponseDTO } from './interfaces/blockchain-api.dto';
+import { ACCOUNT_INFO_ROUTE, PUSH_TX_ROUTE, FAUCET_ROUTE, BANK_BALANCES_ROUTE } from './interfaces/query/routes';
+import {
+  AccountInfoResponseDTO,
+  BankBalancesResponseDTO,
+  GetPoolByIdResponseDto,
+  PushTxRequestDTO,
+  PushTxResponseDTO,
+} from './interfaces/blockchain-api.dto';
 import { Config } from './interfaces/config';
 import { GetPoolById, GetPoolsRequest } from './interfaces/query';
 
@@ -16,6 +22,15 @@ export class BlockchainAPI {
   async getAccountInfo(cosmosAddress: string): Promise<AccountInfoResponseDTO> {
     try {
       const { data } = await axios.get<string, any>(`${this.url}${ACCOUNT_INFO_ROUTE}${cosmosAddress}`);
+      return data;
+    } catch (err: any) {
+      throw this.handleAxiosError(err);
+    }
+  }
+
+  async getBankBalances(cosmosAddress: string): Promise<BankBalancesResponseDTO> {
+    try {
+      const { data } = await axios.get<string, any>(`${this.url}${BANK_BALANCES_ROUTE}${cosmosAddress}`);
       return data;
     } catch (err: any) {
       throw this.handleAxiosError(err);
@@ -40,7 +55,7 @@ export class BlockchainAPI {
     }
   }
 
-  async getPoolById({ id }: GetPoolById): Promise<any> {
+  async getPoolById({ id }: GetPoolById): Promise<GetPoolByIdResponseDto> {
     try {
       const { data } = await axios.get(`${this.url}${GetPoolById.url(id)}`);
       return data;
@@ -48,14 +63,6 @@ export class BlockchainAPI {
       throw this.handleAxiosError(err);
     }
   }
-
-  // async getDxlnUsdcPrice(): Promise<any> {
-  //   try {
-  //     const poolData = await this.getPoolById({ id: '1' });
-  //   } catch (err: any) {
-  //     throw this.handleAxiosError(err);
-  //   }
-  // }
 
   async pushTx(data: PushTxRequestDTO): Promise<PushTxResponseDTO> {
     try {

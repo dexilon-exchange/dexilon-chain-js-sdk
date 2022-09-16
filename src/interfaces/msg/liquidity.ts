@@ -100,7 +100,6 @@ export interface MsgSwapWithinBatch {
 /** MsgSwapWithinBatchResponse defines the Msg/Swap response type. */
 export interface MsgSwapWithinBatchResponse {}
 
-
 const baseMsgDepositWithinBatch: object = { depositor_address: '', pool_id: 0 };
 
 export const MsgDepositWithinBatch = {
@@ -308,11 +307,9 @@ export const MsgWithdrawWithinBatch = {
 
   toJSON(message: MsgWithdrawWithinBatch): unknown {
     const obj: any = {};
-    message.withdrawer_address !== undefined &&
-      (obj.withdrawer_address = message.withdrawer_address);
+    message.withdrawer_address !== undefined && (obj.withdrawer_address = message.withdrawer_address);
     message.pool_id !== undefined && (obj.pool_id = message.pool_id);
-    message.pool_coin !== undefined &&
-      (obj.pool_coin = message.pool_coin ? Coin.toJSON(message.pool_coin) : undefined);
+    message.pool_coin !== undefined && (obj.pool_coin = message.pool_coin ? Coin.toJSON(message.pool_coin) : undefined);
     return obj;
   },
 
@@ -390,7 +387,7 @@ const baseMsgSwapWithinBatch: object = {
 };
 
 export const MsgSwapWithinBatch = {
-  typeUrl: '/dexilon_exchange.dexilonL2.liquidity.Msg/Swap',
+  typeUrl: '/dexilon_exchange.dexilonL2.liquidity.MsgSwapWithinBatch',
   encode(message: MsgSwapWithinBatch, writer: Writer = Writer.create()): Writer {
     if (message.swap_requester_address !== '') {
       writer.uint32(10).string(message.swap_requester_address);
@@ -413,6 +410,8 @@ export const MsgSwapWithinBatch = {
     if (message.order_price !== '') {
       writer.uint32(58).string(message.order_price);
     }
+    console.log(`decode`, JSON.stringify(message, null, 2));
+
     return writer;
   },
 
@@ -494,17 +493,14 @@ export const MsgSwapWithinBatch = {
 
   toJSON(message: MsgSwapWithinBatch): unknown {
     const obj: any = {};
-    message.swap_requester_address !== undefined &&
-      (obj.swap_requester_address = message.swap_requester_address);
+    message.swap_requester_address !== undefined && (obj.swap_requester_address = message.swap_requester_address);
     message.pool_id !== undefined && (obj.pool_id = message.pool_id);
     message.swap_type_id !== undefined && (obj.swap_type_id = message.swap_type_id);
     message.offer_coin !== undefined &&
       (obj.offer_coin = message.offer_coin ? Coin.toJSON(message.offer_coin) : undefined);
     message.demand_coin_denom !== undefined && (obj.demand_coin_denom = message.demand_coin_denom);
     message.offer_coin_fee !== undefined &&
-      (obj.offer_coin_fee = message.offer_coin_fee
-        ? Coin.toJSON(message.offer_coin_fee)
-        : undefined);
+      (obj.offer_coin_fee = message.offer_coin_fee ? Coin.toJSON(message.offer_coin_fee) : undefined);
     message.order_price !== undefined && (obj.order_price = message.order_price);
     return obj;
   },
@@ -546,6 +542,8 @@ export const MsgSwapWithinBatch = {
     } else {
       message.order_price = '';
     }
+    console.log(`fromPartial`, JSON.stringify(message, null, 2));
+
     return message;
   },
 };
@@ -593,7 +591,6 @@ export const MsgSwapWithinBatchResponse = {
     return message;
   },
 };
-
 
 if (util.Long !== Long) {
   util.Long = Long as any;

@@ -2,14 +2,8 @@ import { ethers } from 'ethers';
 import { BlockchainAPI } from '../src/api';
 import { DexilonClient } from '../src/client';
 import { Config } from '../src/interfaces/config';
-import { delay } from './testUtils/delay';
 import { getSignature } from './testUtils/ecdsa';
-import {
-  CosmosWalletData,
-  getRandomCosmosAddress,
-  getRandomEthAddress,
-  randomInteger,
-} from './testUtils/randomizer';
+import { CosmosWalletData, getRandomCosmosAddress, getRandomEthAddress, randomInteger } from './testUtils/randomizer';
 
 describe('full workflow test', () => {
   let granterClient: DexilonClient;
@@ -61,12 +55,7 @@ describe('full workflow test', () => {
         const signedMessage = `${granterWallet.address}`;
         const dataStructure = ['string'];
         const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
-        const res = await granterClient.createAddressMapping(
-          ethNetwork,
-          ethAddress,
-          signedMessage,
-          granterSinature,
-        );
+        const res = await granterClient.createAddressMapping(ethNetwork, ethAddress, signedMessage, granterSinature);
         console.log(res);
         expect(res.tx_response.code).toBe(0);
         expect(res.tx_response.txhash).toBeTruthy();
@@ -87,31 +76,42 @@ describe('full workflow test', () => {
   // return;
   describe('grantPermissions', () => {
     it('works', async () => {
-      await delay(2000);
       const dataStructure = ['string'];
       const timestamp = Math.floor((new Date().getTime() + 3 * 60 * 1000) / 1000.0);
       const signedMessage = `${timestamp}#${granteeWallet.address}`;
       const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
 
       const expirationTime = 15 * 60;
-      const res = await granteeClient.grantPermissions(
-        ethAddress,
-        granterSinature,
-        signedMessage,
-        expirationTime,
-      );
+      const res = await granteeClient.grantPermissions(ethAddress, granterSinature, signedMessage, expirationTime);
 
       console.log(res);
 
       expect(res.tx_response.code).toBe(0);
     });
   });
-// return;
+
+  describe('Liquidity Module', () => {
+    describe('getPoolPrice', () => {
+      it('works', async () => {
+        const res = await granteeClient.getDxlnUsdcPrice();
+        console.log(res);
+        // expect(res.tx_response.code).toBe(0);
+      });
+    });
+    describe('swap', () => {
+      it('works', async () => {
+        // const { usdcToDxln } = await granterClient.getDxlnUsdcPrice();
+        const amount = 100;
+        const res = await granterClient.swap(granterWallet.address, amount.toString(), 'stake', 'usdc', "0.000012");
+        console.log(res);
+        expect(res.tx_response.code).toBe(0);
+      });
+    });
+  });
+  return;
   describe('Trading Module', () => {
     describe('deposit', () => {
       it('works', async () => {
-        await delay(2000);
-
         const balance = '1';
         const asset = 'usdc';
         const res = await granteeClient.depositTrading(granterWallet.address, balance, asset);
@@ -124,8 +124,6 @@ describe('full workflow test', () => {
 
   describe('WithdrawModule', () => {
     it('works', async () => {
-      await delay(2000);
-
       const amount = '1000000000000';
       const denom = 'usdc';
       const chainId = ethNetwork;
@@ -138,7 +136,6 @@ describe('full workflow test', () => {
 
   describe('revokePermissions', () => {
     it('works', async () => {
-      await delay(2000);
       const dataStructure = ['string'];
       const timestamp = Math.floor((new Date().getTime() + 3 * 60 * 1000) / 1000.0);
 

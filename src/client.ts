@@ -25,10 +25,12 @@ import {
 import { fromBase64, toBase64 } from '@cosmjs/encoding';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { PushTxRequestDTO, PushTxResponseDTO } from './interfaces/blockchain-api.dto';
-import { DepositTradingBalanceRequest, WithdrawTradingBalanceRequest } from './interfaces/msg/trading';
+import { DepositTradingBalanceRequest } from './interfaces/msg/trading';
 import { MsgWithdrawTransaction } from './interfaces/msg/withdraw';
 import { MsgDepositWithinBatch, MsgSwapWithinBatch, MsgWithdrawWithinBatch } from './interfaces/msg/liquidity';
 import { BroadcastMode, TxOptions } from './interfaces/common/client';
+import { BigFloat, div } from 'bigfloat.js';
+import { PoolPrices } from './interfaces/query/liquidity.dto';
 
 const defaultSigningClientOptions: SigningStargateClientOptions = {
   broadcastPollIntervalMs: 300,
@@ -147,22 +149,68 @@ export class DexilonClient {
     return await this.authzWrapAndPushTx(grantee, [msg], options);
   }
 
-  async withdrawTrading(granter: string, balance: string, asset: string, options?: TxOptions): Promise<any> {
-    const grantee = this.from;
+  async getDxlnUsdcPrice(): Promise<PoolPrices> {
+    const { pool } = await this.api.getPoolById({ id: '1' });
+    const poolBankAccount = pool.reserve_account_address;
 
-    // The Custom Module Message that the grantee needs to execute
+    const { data } = await this.api.getBankBalances(poolBankAccount);
+    const balances = data.balances;
+
+    const dxlnCoin = balances.find((coin) => coin.denom === this.bondDenom);
+    const usdcCoin = balances.find((coin) => coin.denom === 'usdc');
+
+    console.log(balances);
+
+    const dxlnAmount = new BigFloat(dxlnCoin.amount);
+    const usdcAmount = new BigFloat(usdcCoin.amount);
+    const PRECISION = -16;
+    const priceA = new BigFloat(div(dxlnAmount, usdcAmount, PRECISION));
+    const priceB = new BigFloat(div(usdcAmount, dxlnAmount, PRECISION));
+
+    return { dxlnToUsdc: priceA.toString(), usdcToDxln: priceB.toString() };
+  }
+
+  async swap(
+    address: string,
+    amount: string,
+    wishDenom: string,
+    hasDenom: string,
+    price: string,
+    options?: TxOptions,
+  ): Promise<any> {
+    console.log({ address, amount, wishDenom, hasDenom, price });
+    const from = this.from;
+    console.log({
+      swap_requester_address: address,
+      pool_id: 1,
+      swap_type_id: 1,
+      demand_coin_denom: wishDenom,
+      order_price: price,
+      offer_coin: { denom: hasDenom, amount },
+      offer_coin_fee: {
+        denom: hasDenom,
+        amount: '3',
+      },
+    });
     const msg = {
-      typeUrl: WithdrawTradingBalanceRequest.typeUrl,
-      value: WithdrawTradingBalanceRequest.encode(
-        WithdrawTradingBalanceRequest.fromPartial({
-          accountAddress: granter,
-          balance,
-          asset,
+      typeUrl: MsgSwapWithinBatch.typeUrl,
+      value: MsgSwapWithinBatch.encode(
+        MsgSwapWithinBatch.fromPartial({
+          swap_requester_address: address,
+          pool_id: 1,
+          swap_type_id: 1,
+          demand_coin_denom: wishDenom,
+          order_price: price,
+          offer_coin: { denom: hasDenom, amount },
+          offer_coin_fee: {
+            denom: hasDenom,
+            amount: '3',
+          },
         }),
       ).finish(),
     };
 
-    return await this.authzWrapAndPushTx(grantee, [msg], options);
+    return await this.authzWrapAndPushTx(from, [msg], options);
   }
 
   async withdraw(granter: string, denom: string, amount: string, chainId: number, options?: TxOptions): Promise<any> {

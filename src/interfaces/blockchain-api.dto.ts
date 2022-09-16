@@ -1,3 +1,4 @@
+import { Coin } from '@cosmjs/proto-signing';
 import { BroadcastMode } from './common/client';
 
 export class PushTxRequestDTO {
@@ -21,6 +22,26 @@ export class PushTxResponseDTO {
     timestamp: string;
     events: Array<any>;
   };
+}
+
+export class GetPoolByIdResponseDto {
+  pool: PoolInfo;
+}
+
+export class PoolInfo {
+  id: string;
+  type_id: number;
+  reserve_coin_denoms: string[];
+  reserve_account_address: string;
+  pool_coin_denom: string;
+}
+export class BankBalancesResponseDTO {
+  status: string;
+  data: BankBalances;
+}
+export class BankBalances {
+  balances: Coin[];
+  pagination: any;
 }
 
 export class AccountInfoResponseDTO {

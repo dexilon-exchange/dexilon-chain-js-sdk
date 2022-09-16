@@ -26,3 +26,8 @@ export class PoolInfo {
   reserve_account_address: string;
   pool_coin_denom: string;
 }
+
+export class PoolPrices {
+  dxlnToUsdc: string;
+  usdcToDxln: string;
+}

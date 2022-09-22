@@ -41,8 +41,8 @@ describe('full workflow test', () => {
     // };
 
     const api = new BlockchainAPI(config);
-    await api.faucet(granterWallet.address);
-    await api.faucet(granteeWallet.address);
+
+    await Promise.all([api.faucet(granterWallet.address), api.faucet(granteeWallet.address)])
 
     granterClient = new DexilonClient(granterWallet.wallet, api, config);
     await granterClient.init();
@@ -73,18 +73,8 @@ describe('full workflow test', () => {
         expect(res.tx_response.txhash.length).not.toBe(0);
       });
     });
-
-    // xdescribe('createAddressMapping::destructive', () => {
-    //   it('fails on :: mapping exists', async () => {
-    //     await delay(2000);
-    //     const res = await granterClient.createAddressMapping(ethNetwork, ethAddress);
-    //     console.log(res);
-    //     expect(res.tx_response.code).not.toBe(0);
-    //     expect(res.tx_response.code).toBe(19);
-    //   }, 10000);
-    // });
   });
-  // return;
+
   describe('grantPermissions', () => {
     it('works', async () => {
       await delay(2000);

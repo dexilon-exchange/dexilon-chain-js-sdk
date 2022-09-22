@@ -8,7 +8,7 @@ export class BlockchainAPI {
   private readonly url: string;
 
   constructor({ blockchainApiHost, blockchainApiPort }: Config) {
-    this.url = `http://${blockchainApiHost}:${blockchainApiPort}`;
+    this.url = `https://${blockchainApiHost}:${blockchainApiPort}`;
   }
 
   // accounts

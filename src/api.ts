@@ -7,8 +7,8 @@ import { GetPoolById, GetPoolsRequest } from './interfaces/query';
 export class BlockchainAPI {
   private readonly url: string;
 
-  constructor({ blockchainApiHost, blockchainApiPort }: Config) {
-    this.url = `https://${blockchainApiHost}:${blockchainApiPort}`;
+  constructor({ blockchainApiUrl }: Config) {
+    this.url = blockchainApiUrl;
   }
 
   // accounts

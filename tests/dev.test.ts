@@ -4,12 +4,7 @@ import { DexilonClient } from '../src/client';
 import { Config } from '../src/interfaces/config';
 import { delay } from './testUtils/delay';
 import { getSignature } from './testUtils/ecdsa';
-import {
-  CosmosWalletData,
-  getRandomCosmosAddress,
-  getRandomEthAddress,
-  randomInteger,
-} from './testUtils/randomizer';
+import { CosmosWalletData, getRandomCosmosAddress, getRandomEthAddress, randomInteger } from './testUtils/randomizer';
 
 describe('full workflow test', () => {
   let granterClient: DexilonClient;
@@ -27,22 +22,22 @@ describe('full workflow test', () => {
     console.log({ granter: granterWallet.address, grantee: granteeWallet.address });
 
     const config: Config = {
-      blockchainApiHost: 'localhost',
-      blockchainApiPort: 3312,
+      blockchainApiUrl: 'http://localhost:3312',
       chainId: 'dexilonL2',
       bondDenom: 'stake',
     };
 
     // const config: Config = {
-    //   blockchainApiHost: '88.198.205.192',
-    //   blockchainApiPort: 4000,
+    //   blockchainApiUrl: 'https://dev2.dexilon-dev.xyz',
+    //   // blockchainApiHost: '88.198.205.192',
+    //   // blockchainApiPort: 4000,
     //   chainId: 'dexilon-testnet',
     //   bondDenom: 'dxln',
     // };
 
     const api = new BlockchainAPI(config);
 
-    await Promise.all([api.faucet(granterWallet.address), api.faucet(granteeWallet.address)])
+    await Promise.all([api.faucet(granterWallet.address), api.faucet(granteeWallet.address)]);
 
     granterClient = new DexilonClient(granterWallet.wallet, api, config);
     await granterClient.init();
@@ -61,12 +56,7 @@ describe('full workflow test', () => {
         const signedMessage = `${granterWallet.address}`;
         const dataStructure = ['string'];
         const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
-        const res = await granterClient.createAddressMapping(
-          ethNetwork,
-          ethAddress,
-          signedMessage,
-          granterSinature,
-        );
+        const res = await granterClient.createAddressMapping(ethNetwork, ethAddress, signedMessage, granterSinature);
         console.log(res);
         expect(res.tx_response.code).toBe(0);
         expect(res.tx_response.txhash).toBeTruthy();
@@ -84,19 +74,14 @@ describe('full workflow test', () => {
       const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
 
       const expirationTime = 15 * 60;
-      const res = await granteeClient.grantPermissions(
-        ethAddress,
-        granterSinature,
-        signedMessage,
-        expirationTime,
-      );
+      const res = await granteeClient.grantPermissions(ethAddress, granterSinature, signedMessage, expirationTime);
 
       console.log(res);
 
       expect(res.tx_response.code).toBe(0);
     });
   });
-// return;
+  // return;
   describe('Trading Module', () => {
     describe('deposit', () => {
       it('works', async () => {

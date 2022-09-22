@@ -379,17 +379,21 @@ export const MsgWithdrawWithinBatchResponse = {
 };
 
 const baseMsgSwapWithinBatch: object = {
-  swap_requester_address: '',
+  swap_requester_address: "",
   pool_id: 0,
   swap_type_id: 0,
-  demand_coin_denom: '',
-  order_price: '',
+  demand_coin_denom: "",
+  order_price: "",
 };
 
 export const MsgSwapWithinBatch = {
   typeUrl: '/dexilon_exchange.dexilonL2.liquidity.MsgSwapWithinBatch',
-  encode(message: MsgSwapWithinBatch, writer: Writer = Writer.create()): Writer {
-    if (message.swap_requester_address !== '') {
+
+  encode(
+    message: MsgSwapWithinBatch,
+    writer: Writer = Writer.create()
+  ): Writer {
+    if (message.swap_requester_address !== "") {
       writer.uint32(10).string(message.swap_requester_address);
     }
     if (message.pool_id !== 0) {
@@ -401,17 +405,15 @@ export const MsgSwapWithinBatch = {
     if (message.offer_coin !== undefined) {
       Coin.encode(message.offer_coin, writer.uint32(34).fork()).ldelim();
     }
-    if (message.demand_coin_denom !== '') {
+    if (message.demand_coin_denom !== "") {
       writer.uint32(42).string(message.demand_coin_denom);
     }
     if (message.offer_coin_fee !== undefined) {
       Coin.encode(message.offer_coin_fee, writer.uint32(50).fork()).ldelim();
     }
-    if (message.order_price !== '') {
+    if (message.order_price !== "") {
       writer.uint32(58).string(message.order_price);
     }
-    console.log(`decode`, JSON.stringify(message, null, 2));
-
     return writer;
   },
 
@@ -453,10 +455,13 @@ export const MsgSwapWithinBatch = {
 
   fromJSON(object: any): MsgSwapWithinBatch {
     const message = { ...baseMsgSwapWithinBatch } as MsgSwapWithinBatch;
-    if (object.swap_requester_address !== undefined && object.swap_requester_address !== null) {
+    if (
+      object.swap_requester_address !== undefined &&
+      object.swap_requester_address !== null
+    ) {
       message.swap_requester_address = String(object.swap_requester_address);
     } else {
-      message.swap_requester_address = '';
+      message.swap_requester_address = "";
     }
     if (object.pool_id !== undefined && object.pool_id !== null) {
       message.pool_id = Number(object.pool_id);
@@ -473,10 +478,13 @@ export const MsgSwapWithinBatch = {
     } else {
       message.offer_coin = undefined;
     }
-    if (object.demand_coin_denom !== undefined && object.demand_coin_denom !== null) {
+    if (
+      object.demand_coin_denom !== undefined &&
+      object.demand_coin_denom !== null
+    ) {
       message.demand_coin_denom = String(object.demand_coin_denom);
     } else {
-      message.demand_coin_denom = '';
+      message.demand_coin_denom = "";
     }
     if (object.offer_coin_fee !== undefined && object.offer_coin_fee !== null) {
       message.offer_coin_fee = Coin.fromJSON(object.offer_coin_fee);
@@ -486,31 +494,42 @@ export const MsgSwapWithinBatch = {
     if (object.order_price !== undefined && object.order_price !== null) {
       message.order_price = String(object.order_price);
     } else {
-      message.order_price = '';
+      message.order_price = "";
     }
     return message;
   },
 
   toJSON(message: MsgSwapWithinBatch): unknown {
     const obj: any = {};
-    message.swap_requester_address !== undefined && (obj.swap_requester_address = message.swap_requester_address);
+    message.swap_requester_address !== undefined &&
+      (obj.swap_requester_address = message.swap_requester_address);
     message.pool_id !== undefined && (obj.pool_id = message.pool_id);
-    message.swap_type_id !== undefined && (obj.swap_type_id = message.swap_type_id);
+    message.swap_type_id !== undefined &&
+      (obj.swap_type_id = message.swap_type_id);
     message.offer_coin !== undefined &&
-      (obj.offer_coin = message.offer_coin ? Coin.toJSON(message.offer_coin) : undefined);
-    message.demand_coin_denom !== undefined && (obj.demand_coin_denom = message.demand_coin_denom);
+      (obj.offer_coin = message.offer_coin
+        ? Coin.toJSON(message.offer_coin)
+        : undefined);
+    message.demand_coin_denom !== undefined &&
+      (obj.demand_coin_denom = message.demand_coin_denom);
     message.offer_coin_fee !== undefined &&
-      (obj.offer_coin_fee = message.offer_coin_fee ? Coin.toJSON(message.offer_coin_fee) : undefined);
-    message.order_price !== undefined && (obj.order_price = message.order_price);
+      (obj.offer_coin_fee = message.offer_coin_fee
+        ? Coin.toJSON(message.offer_coin_fee)
+        : undefined);
+    message.order_price !== undefined &&
+      (obj.order_price = message.order_price);
     return obj;
   },
 
   fromPartial(object: DeepPartial<MsgSwapWithinBatch>): MsgSwapWithinBatch {
     const message = { ...baseMsgSwapWithinBatch } as MsgSwapWithinBatch;
-    if (object.swap_requester_address !== undefined && object.swap_requester_address !== null) {
+    if (
+      object.swap_requester_address !== undefined &&
+      object.swap_requester_address !== null
+    ) {
       message.swap_requester_address = object.swap_requester_address;
     } else {
-      message.swap_requester_address = '';
+      message.swap_requester_address = "";
     }
     if (object.pool_id !== undefined && object.pool_id !== null) {
       message.pool_id = object.pool_id;
@@ -527,10 +546,13 @@ export const MsgSwapWithinBatch = {
     } else {
       message.offer_coin = undefined;
     }
-    if (object.demand_coin_denom !== undefined && object.demand_coin_denom !== null) {
+    if (
+      object.demand_coin_denom !== undefined &&
+      object.demand_coin_denom !== null
+    ) {
       message.demand_coin_denom = object.demand_coin_denom;
     } else {
-      message.demand_coin_denom = '';
+      message.demand_coin_denom = "";
     }
     if (object.offer_coin_fee !== undefined && object.offer_coin_fee !== null) {
       message.offer_coin_fee = Coin.fromPartial(object.offer_coin_fee);
@@ -540,14 +562,11 @@ export const MsgSwapWithinBatch = {
     if (object.order_price !== undefined && object.order_price !== null) {
       message.order_price = object.order_price;
     } else {
-      message.order_price = '';
+      message.order_price = "";
     }
-    console.log(`fromPartial`, JSON.stringify(message, null, 2));
-
     return message;
   },
 };
-
 const baseMsgSwapWithinBatchResponse: object = {};
 
 export const MsgSwapWithinBatchResponse = {

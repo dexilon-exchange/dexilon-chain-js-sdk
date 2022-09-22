@@ -192,6 +192,7 @@ export class DexilonClient {
         amount: '3',
       },
     });
+
     const msg = {
       typeUrl: MsgSwapWithinBatch.typeUrl,
       value: MsgSwapWithinBatch.encode(

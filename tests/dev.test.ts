@@ -14,18 +14,18 @@ describe('full workflow test', () => {
   let granterWallet: CosmosWalletData;
   let granteeWallet: CosmosWalletData;
 
+  const config: Config = {
+    blockchainApiHost: 'localhost',
+    blockchainApiPort: 3312,
+    chainId: 'dexilonL2',
+    bondDenom: 'stake',
+  };
+
   beforeAll(async () => {
     granterWallet = await getRandomCosmosAddress();
     granteeWallet = await getRandomCosmosAddress();
 
     console.log({ granter: granterWallet.address, grantee: granteeWallet.address });
-
-    const config: Config = {
-      blockchainApiHost: 'localhost',
-      blockchainApiPort: 3312,
-      chainId: 'dexilonL2',
-      bondDenom: 'stake',
-    };
 
     // const config: Config = {
     //   blockchainApiHost: '88.198.205.192',
@@ -35,8 +35,7 @@ describe('full workflow test', () => {
     // };
 
     const api = new BlockchainAPI(config);
-    await api.faucet(granterWallet.address);
-    await api.faucet(granteeWallet.address);
+    await Promise.all([api.faucet(granterWallet.address), api.faucet(granteeWallet.address)]);
 
     granterClient = new DexilonClient(granterWallet.wallet, api, config);
     await granterClient.init();
@@ -56,22 +55,12 @@ describe('full workflow test', () => {
         const dataStructure = ['string'];
         const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
         const res = await granterClient.createAddressMapping(ethNetwork, ethAddress, signedMessage, granterSinature);
-        console.log(res);
+        console.log(JSON.stringify(res, null, 2));
         expect(res.tx_response.code).toBe(0);
         expect(res.tx_response.txhash).toBeTruthy();
         expect(res.tx_response.txhash.length).not.toBe(0);
       });
     });
-
-    // xdescribe('createAddressMapping::destructive', () => {
-    //   it('fails on :: mapping exists', async () => {
-    //     await delay(2000);
-    //     const res = await granterClient.createAddressMapping(ethNetwork, ethAddress);
-    //     console.log(res);
-    //     expect(res.tx_response.code).not.toBe(0);
-    //     expect(res.tx_response.code).toBe(19);
-    //   }, 10000);
-    // });
   });
   // return;
   describe('grantPermissions', () => {
@@ -84,41 +73,33 @@ describe('full workflow test', () => {
       const expirationTime = 15 * 60;
       const res = await granteeClient.grantPermissions(ethAddress, granterSinature, signedMessage, expirationTime);
 
-      console.log(res);
+      console.log(JSON.stringify(res, null, 2));
 
       expect(res.tx_response.code).toBe(0);
     });
   });
 
-  describe('Liquidity Module', () => {
-    describe('getPoolPrice', () => {
-      it('works', async () => {
-        const res = await granteeClient.getDxlnUsdcPrice();
-        console.log(res);
-        // expect(res.tx_response.code).toBe(0);
-      });
-    });
-    describe('swap', () => {
-      it('works', async () => {
-        // const { usdcToDxln } = await granterClient.getDxlnUsdcPrice();
-        const amount = 100;
-        const res = await granterClient.swap(granterWallet.address, amount.toString(), 'stake', 'usdc', "0.000012");
-        console.log(res);
-        expect(res.tx_response.code).toBe(0);
-      });
-    });
-  });
-  return;
-  describe('Trading Module', () => {
-    describe('deposit', () => {
-      it('works', async () => {
-        const balance = '1';
-        const asset = 'usdc';
-        const res = await granteeClient.depositTrading(granterWallet.address, balance, asset);
-        console.log(res);
+  // describe('Liquidity Module', () => {
+  //   describe('swap', () => {
+  //     it('works', async () => {
+  //       const { dxlnToUsdc } = await granterClient.getDxlnUsdcPrice();
+  //       const amount = 100;
+  //       const res = await granterClient.swap(granterWallet.address, amount.toString(), config.bondDenom, 'usdc', usdcToDxln);
+  //       console.log(JSON.stringify(res, null, 2));
+  //       expect(res.tx_response.code).toBe(0);
+  //     });
+  //   });
+  // });
+  // return;
 
-        expect(res.tx_response.code).toBe(0);
-      });
+  describe('Trading Module', () => {
+    it('works', async () => {
+      const balance = '1';
+      const asset = 'usdc';
+      const res = await granteeClient.depositTrading(granterWallet.address, balance, asset);
+      console.log(JSON.stringify(res, null, 2));
+
+      expect(res.tx_response.code).toBe(0);
     });
   });
 
@@ -128,7 +109,7 @@ describe('full workflow test', () => {
       const denom = 'usdc';
       const chainId = ethNetwork;
       const res = await granteeClient.withdraw(granterWallet.address, denom, amount, chainId);
-      console.log(res);
+      console.log(JSON.stringify(res, null, 2));
 
       expect(res.tx_response.code).toBe(0);
     });
@@ -144,7 +125,7 @@ describe('full workflow test', () => {
 
       const res = await granterClient.revokePermissions(ethAddress, granterSinature, signedMessage);
 
-      console.log(res);
+      console.log(JSON.stringify(res, null, 2));
 
       expect(res.tx_response.code).toBe(0);
     });

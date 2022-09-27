@@ -14,13 +14,6 @@ describe('full workflow test', () => {
   let granterWallet: CosmosWalletData;
   let granteeWallet: CosmosWalletData;
 
-  const config: Config = {
-    blockchainApiHost: 'localhost',
-    blockchainApiPort: 3312,
-    chainId: 'dexilonL2',
-    bondDenom: 'stake',
-  };
-
   beforeAll(async () => {
     granterWallet = await getRandomCosmosAddress();
     granteeWallet = await getRandomCosmosAddress();
@@ -28,13 +21,19 @@ describe('full workflow test', () => {
     console.log({ granter: granterWallet.address, grantee: granteeWallet.address });
 
     // const config: Config = {
-    //   blockchainApiHost: '88.198.205.192',
-    //   blockchainApiPort: 4000,
-    //   chainId: 'dexilon-testnet',
-    //   bondDenom: 'dxln',
+    //   blockchainApiUrl: 'http://localhost:3312',
+    //   chainId: 'dexilonL2',
+    //   bondDenom: 'stake',
     // };
 
+    const config: Config = {
+      blockchainApiUrl: 'https://dev2.dexilon-dev.xyz',
+      chainId: 'dexilon-testnet',
+      bondDenom: 'dxln',
+    };
+
     const api = new BlockchainAPI(config);
+
     await Promise.all([api.faucet(granterWallet.address), api.faucet(granteeWallet.address)]);
 
     granterClient = new DexilonClient(granterWallet.wallet, api, config);
@@ -48,21 +47,32 @@ describe('full workflow test', () => {
     ethAddress = etherWallet.address;
   });
 
+  describe('getters', () => {
+    it('getBankBalances', async () => {});
+  });
+
   describe('registration', () => {
-    describe('createAddressMapping::constructive', () => {
-      it('works', async () => {
-        const signedMessage = `${granterWallet.address}`;
-        const dataStructure = ['string'];
-        const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
-        const res = await granterClient.createAddressMapping(ethNetwork, ethAddress, signedMessage, granterSinature);
-        console.log(JSON.stringify(res, null, 2));
-        expect(res.tx_response.code).toBe(0);
-        expect(res.tx_response.txhash).toBeTruthy();
-        expect(res.tx_response.txhash.length).not.toBe(0);
-      });
+    it('works', async () => {
+      const signedMessage = `${granterWallet.address}`;
+      const dataStructure = ['string'];
+      const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
+      const res = await granterClient.createAddressMapping(ethNetwork, ethAddress, signedMessage, granterSinature);
+      console.log(res);
+      expect(res.tx_response.code).toBe(0);
+      expect(res.tx_response.txhash).toBeTruthy();
+      expect(res.tx_response.txhash.length).not.toBe(0);
+    });
+
+    it('should not allow rewrite address mapping!', async () => {
+      const signedMessage = `${granterWallet.address}`;
+      const dataStructure = ['string'];
+      const granterSinature = await getSignature(etherWallet, [signedMessage], dataStructure);
+      const res = await granterClient.createAddressMapping(ethNetwork, ethAddress, signedMessage, granterSinature);
+      console.log(res);
+      expect(res.tx_response.code).not.toBe(0);
     });
   });
-  // return;
+
   describe('grantPermissions', () => {
     it('works', async () => {
       const dataStructure = ['string'];

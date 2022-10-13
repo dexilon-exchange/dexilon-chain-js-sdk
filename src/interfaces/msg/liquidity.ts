@@ -1,6 +1,6 @@
 /* eslint-disable */
-import { Reader, util, configure, Writer } from 'protobufjs/minimal';
 import Long from 'long';
+import { Reader, util, configure, Writer } from 'protobufjs/minimal';
 import { Coin } from '../common/coin';
 import { DeepPartial, longToNumber } from '../common/common';
 
@@ -100,10 +100,20 @@ export interface MsgSwapWithinBatch {
 /** MsgSwapWithinBatchResponse defines the Msg/Swap response type. */
 export interface MsgSwapWithinBatchResponse {}
 
+export interface MsgSwapWithinBatchSimpified {
+  /** address of swap requester */
+  swap_requester_address: string;
+  /** offer sdk.coin for the swap request, must match the denom in the pool. */
+  offer_coin: Coin | undefined;
+  /** denom of demand coin to be exchanged on the swap request, must match the denom in the pool. */
+  demand_coin_denom: string;
+  price: string;
+}
+
 const baseMsgDepositWithinBatch: object = { depositor_address: '', pool_id: 0 };
 
 export const MsgDepositWithinBatch = {
-  typeUrl: '/dexilon_exchange.dexilonL2.liquidity.Msg/DepositWithinBatch',
+  typeUrl: '/dexilon_exchange.dexilonL2.liquidity.MsgDepositWithinBatch',
   encode(message: MsgDepositWithinBatch, writer: Writer = Writer.create()): Writer {
     if (message.depositor_address !== '') {
       writer.uint32(10).string(message.depositor_address);
@@ -247,7 +257,7 @@ const baseMsgWithdrawWithinBatch: object = {
 };
 
 export const MsgWithdrawWithinBatch = {
-  typeUrl: '/dexilon_exchange.dexilonL2.liquidity.Msg/WithdrawWithinBatch',
+  typeUrl: '/dexilon_exchange.dexilonL2.liquidity.MsgWithdrawWithinBatch',
   encode(message: MsgWithdrawWithinBatch, writer: Writer = Writer.create()): Writer {
     if (message.withdrawer_address !== '') {
       writer.uint32(10).string(message.withdrawer_address);
@@ -379,21 +389,17 @@ export const MsgWithdrawWithinBatchResponse = {
 };
 
 const baseMsgSwapWithinBatch: object = {
-  swap_requester_address: "",
+  swap_requester_address: '',
   pool_id: 0,
   swap_type_id: 0,
-  demand_coin_denom: "",
-  order_price: "",
+  demand_coin_denom: '',
+  order_price: '',
 };
 
 export const MsgSwapWithinBatch = {
   typeUrl: '/dexilon_exchange.dexilonL2.liquidity.MsgSwapWithinBatch',
-
-  encode(
-    message: MsgSwapWithinBatch,
-    writer: Writer = Writer.create()
-  ): Writer {
-    if (message.swap_requester_address !== "") {
+  encode(message: MsgSwapWithinBatch, writer: Writer = Writer.create()): Writer {
+    if (message.swap_requester_address !== '') {
       writer.uint32(10).string(message.swap_requester_address);
     }
     if (message.pool_id !== 0) {
@@ -405,13 +411,13 @@ export const MsgSwapWithinBatch = {
     if (message.offer_coin !== undefined) {
       Coin.encode(message.offer_coin, writer.uint32(34).fork()).ldelim();
     }
-    if (message.demand_coin_denom !== "") {
+    if (message.demand_coin_denom !== '') {
       writer.uint32(42).string(message.demand_coin_denom);
     }
     if (message.offer_coin_fee !== undefined) {
       Coin.encode(message.offer_coin_fee, writer.uint32(50).fork()).ldelim();
     }
-    if (message.order_price !== "") {
+    if (message.order_price !== '') {
       writer.uint32(58).string(message.order_price);
     }
     return writer;
@@ -455,13 +461,10 @@ export const MsgSwapWithinBatch = {
 
   fromJSON(object: any): MsgSwapWithinBatch {
     const message = { ...baseMsgSwapWithinBatch } as MsgSwapWithinBatch;
-    if (
-      object.swap_requester_address !== undefined &&
-      object.swap_requester_address !== null
-    ) {
+    if (object.swap_requester_address !== undefined && object.swap_requester_address !== null) {
       message.swap_requester_address = String(object.swap_requester_address);
     } else {
-      message.swap_requester_address = "";
+      message.swap_requester_address = '';
     }
     if (object.pool_id !== undefined && object.pool_id !== null) {
       message.pool_id = Number(object.pool_id);
@@ -478,13 +481,10 @@ export const MsgSwapWithinBatch = {
     } else {
       message.offer_coin = undefined;
     }
-    if (
-      object.demand_coin_denom !== undefined &&
-      object.demand_coin_denom !== null
-    ) {
+    if (object.demand_coin_denom !== undefined && object.demand_coin_denom !== null) {
       message.demand_coin_denom = String(object.demand_coin_denom);
     } else {
-      message.demand_coin_denom = "";
+      message.demand_coin_denom = '';
     }
     if (object.offer_coin_fee !== undefined && object.offer_coin_fee !== null) {
       message.offer_coin_fee = Coin.fromJSON(object.offer_coin_fee);
@@ -494,42 +494,31 @@ export const MsgSwapWithinBatch = {
     if (object.order_price !== undefined && object.order_price !== null) {
       message.order_price = String(object.order_price);
     } else {
-      message.order_price = "";
+      message.order_price = '';
     }
     return message;
   },
 
   toJSON(message: MsgSwapWithinBatch): unknown {
     const obj: any = {};
-    message.swap_requester_address !== undefined &&
-      (obj.swap_requester_address = message.swap_requester_address);
+    message.swap_requester_address !== undefined && (obj.swap_requester_address = message.swap_requester_address);
     message.pool_id !== undefined && (obj.pool_id = message.pool_id);
-    message.swap_type_id !== undefined &&
-      (obj.swap_type_id = message.swap_type_id);
+    message.swap_type_id !== undefined && (obj.swap_type_id = message.swap_type_id);
     message.offer_coin !== undefined &&
-      (obj.offer_coin = message.offer_coin
-        ? Coin.toJSON(message.offer_coin)
-        : undefined);
-    message.demand_coin_denom !== undefined &&
-      (obj.demand_coin_denom = message.demand_coin_denom);
+      (obj.offer_coin = message.offer_coin ? Coin.toJSON(message.offer_coin) : undefined);
+    message.demand_coin_denom !== undefined && (obj.demand_coin_denom = message.demand_coin_denom);
     message.offer_coin_fee !== undefined &&
-      (obj.offer_coin_fee = message.offer_coin_fee
-        ? Coin.toJSON(message.offer_coin_fee)
-        : undefined);
-    message.order_price !== undefined &&
-      (obj.order_price = message.order_price);
+      (obj.offer_coin_fee = message.offer_coin_fee ? Coin.toJSON(message.offer_coin_fee) : undefined);
+    message.order_price !== undefined && (obj.order_price = message.order_price);
     return obj;
   },
 
   fromPartial(object: DeepPartial<MsgSwapWithinBatch>): MsgSwapWithinBatch {
     const message = { ...baseMsgSwapWithinBatch } as MsgSwapWithinBatch;
-    if (
-      object.swap_requester_address !== undefined &&
-      object.swap_requester_address !== null
-    ) {
+    if (object.swap_requester_address !== undefined && object.swap_requester_address !== null) {
       message.swap_requester_address = object.swap_requester_address;
     } else {
-      message.swap_requester_address = "";
+      message.swap_requester_address = '';
     }
     if (object.pool_id !== undefined && object.pool_id !== null) {
       message.pool_id = object.pool_id;
@@ -546,13 +535,10 @@ export const MsgSwapWithinBatch = {
     } else {
       message.offer_coin = undefined;
     }
-    if (
-      object.demand_coin_denom !== undefined &&
-      object.demand_coin_denom !== null
-    ) {
+    if (object.demand_coin_denom !== undefined && object.demand_coin_denom !== null) {
       message.demand_coin_denom = object.demand_coin_denom;
     } else {
-      message.demand_coin_denom = "";
+      message.demand_coin_denom = '';
     }
     if (object.offer_coin_fee !== undefined && object.offer_coin_fee !== null) {
       message.offer_coin_fee = Coin.fromPartial(object.offer_coin_fee);
@@ -562,11 +548,12 @@ export const MsgSwapWithinBatch = {
     if (object.order_price !== undefined && object.order_price !== null) {
       message.order_price = object.order_price;
     } else {
-      message.order_price = "";
+      message.order_price = '';
     }
     return message;
   },
 };
+
 const baseMsgSwapWithinBatchResponse: object = {};
 
 export const MsgSwapWithinBatchResponse = {
@@ -607,6 +594,124 @@ export const MsgSwapWithinBatchResponse = {
     const message = {
       ...baseMsgSwapWithinBatchResponse,
     } as MsgSwapWithinBatchResponse;
+    return message;
+  },
+};
+
+const baseMsgSwapWithinBatchSimpified: object = {
+  swap_requester_address: "",
+  demand_coin_denom: "",
+  price: "",
+};
+
+export const MsgSwapWithinBatchSimpified = {
+  typeUrl: '/dexilon_exchange.dexilonL2.liquidity.MsgSwapWithinBatchSimpified',
+  encode(message: MsgSwapWithinBatchSimpified, writer: Writer = Writer.create()): Writer {
+    if (message.swap_requester_address !== '') {
+      writer.uint32(10).string(message.swap_requester_address);
+    }
+    if (message.offer_coin !== undefined) {
+      Coin.encode(message.offer_coin, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.demand_coin_denom !== '') {
+      writer.uint32(26).string(message.demand_coin_denom);
+    }
+    if (message.price !== '') {
+      writer.uint32(34).string(message.price);
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgSwapWithinBatchSimpified {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = {
+      ...baseMsgSwapWithinBatchSimpified,
+    } as MsgSwapWithinBatchSimpified;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.swap_requester_address = reader.string();
+          break;
+        case 2:
+          message.offer_coin = Coin.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.demand_coin_denom = reader.string();
+          break;
+        case 4:
+          message.price = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgSwapWithinBatchSimpified {
+    const message = {
+      ...baseMsgSwapWithinBatchSimpified,
+    } as MsgSwapWithinBatchSimpified;
+    if (object.swap_requester_address !== undefined && object.swap_requester_address !== null) {
+      message.swap_requester_address = String(object.swap_requester_address);
+    } else {
+      message.swap_requester_address = '';
+    }
+    if (object.offer_coin !== undefined && object.offer_coin !== null) {
+      message.offer_coin = Coin.fromJSON(object.offer_coin);
+    } else {
+      message.offer_coin = undefined;
+    }
+    if (object.demand_coin_denom !== undefined && object.demand_coin_denom !== null) {
+      message.demand_coin_denom = String(object.demand_coin_denom);
+    } else {
+      message.demand_coin_denom = '';
+    }
+    if (object.price !== undefined && object.price !== null) {
+      message.price = String(object.price);
+    } else {
+      message.price = '';
+    }
+    return message;
+  },
+
+  toJSON(message: MsgSwapWithinBatchSimpified): unknown {
+    const obj: any = {};
+    message.swap_requester_address !== undefined && (obj.swap_requester_address = message.swap_requester_address);
+    message.offer_coin !== undefined &&
+      (obj.offer_coin = message.offer_coin ? Coin.toJSON(message.offer_coin) : undefined);
+    message.demand_coin_denom !== undefined && (obj.demand_coin_denom = message.demand_coin_denom);
+    message.price !== undefined && (obj.price = message.price);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<MsgSwapWithinBatchSimpified>): MsgSwapWithinBatchSimpified {
+    const message = {
+      ...baseMsgSwapWithinBatchSimpified,
+    } as MsgSwapWithinBatchSimpified;
+    if (object.swap_requester_address !== undefined && object.swap_requester_address !== null) {
+      message.swap_requester_address = object.swap_requester_address;
+    } else {
+      message.swap_requester_address = '';
+    }
+    if (object.offer_coin !== undefined && object.offer_coin !== null) {
+      message.offer_coin = Coin.fromPartial(object.offer_coin);
+    } else {
+      message.offer_coin = undefined;
+    }
+    if (object.demand_coin_denom !== undefined && object.demand_coin_denom !== null) {
+      message.demand_coin_denom = object.demand_coin_denom;
+    } else {
+      message.demand_coin_denom = '';
+    }
+    if (object.price !== undefined && object.price !== null) {
+      message.price = object.price;
+    } else {
+      message.price = '';
+    }
     return message;
   },
 };

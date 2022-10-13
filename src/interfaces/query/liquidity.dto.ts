@@ -1,4 +1,6 @@
 import { PaginationRequestDTO, PaginationResponseDTO } from '../common/pagination';
+import { Coin } from '../common/coin';
+import { BigFloat } from 'bigfloat.js';
 
 export class GetPoolsRequest extends PaginationRequestDTO {
   static url = '/cosmos/liquidity/v1beta1/pools';
@@ -28,6 +30,8 @@ export class PoolInfo {
 }
 
 export class PoolPrices {
-  dxlnToUsdc: string;
-  usdcToDxln: string;
+  supplyA: Coin;
+  supplyB: Coin;
+  usdcToDxln: BigFloat;
+  dxlnToUsdc: BigFloat;
 }

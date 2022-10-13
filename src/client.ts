@@ -27,10 +27,12 @@ import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { PushTxRequestDTO, PushTxResponseDTO } from './interfaces/blockchain-api.dto';
 import { DepositTradingBalanceRequest } from './interfaces/msg/trading';
 import { MsgWithdrawTransaction } from './interfaces/msg/withdraw';
-import { MsgDepositWithinBatch, MsgSwapWithinBatch, MsgWithdrawWithinBatch } from './interfaces/msg/liquidity';
+import { MsgDepositWithinBatch, MsgSwapWithinBatchSimpified, MsgWithdrawWithinBatch } from './interfaces/msg/liquidity';
 import { BroadcastMode, TxOptions } from './interfaces/common/client';
-import { BigFloat, div } from 'bigfloat.js';
 import { PoolPrices } from './interfaces/query/liquidity.dto';
+import { Coin } from './interfaces/common/coin';
+
+import { BigFloat, div } from 'bigfloat.js';
 
 const defaultSigningClientOptions: SigningStargateClientOptions = {
   broadcastPollIntervalMs: 300,
@@ -56,7 +58,7 @@ export class DexilonClient {
     registry.register(MsgGrantPermissionRequest.typeUrl, MsgGrantPermissionRequest);
     registry.register(MsgRevokePermissionRequest.typeUrl, MsgRevokePermissionRequest);
     registry.register(MsgDepositWithinBatch.typeUrl, MsgDepositWithinBatch);
-    registry.register(MsgSwapWithinBatch.typeUrl, MsgSwapWithinBatch);
+    registry.register(MsgSwapWithinBatchSimpified.typeUrl, MsgSwapWithinBatchSimpified);
     registry.register(MsgWithdrawWithinBatch.typeUrl, MsgWithdrawWithinBatch);
 
     const options = { ...defaultSigningClientOptions, registry: registry };
@@ -70,6 +72,12 @@ export class DexilonClient {
 
   get chainId() {
     return this.config.chainId;
+  }
+
+  async getBankBalances(address: string): Promise<Coin[]> {
+    return await (
+      await this.api.getBankBalances(address)
+    ).data.balances;
   }
 
   async createAddressMapping(
@@ -159,59 +167,47 @@ export class DexilonClient {
     const dxlnCoin = balances.find((coin) => coin.denom === this.bondDenom);
     const usdcCoin = balances.find((coin) => coin.denom === 'usdc');
 
-    console.log(balances);
-
     const dxlnAmount = new BigFloat(dxlnCoin.amount);
     const usdcAmount = new BigFloat(usdcCoin.amount);
-    const PRECISION = -16;
+    const PRECISION = -10;
     const priceA = new BigFloat(div(dxlnAmount, usdcAmount, PRECISION));
     const priceB = new BigFloat(div(usdcAmount, dxlnAmount, PRECISION));
 
-    return { dxlnToUsdc: priceA.toString(), usdcToDxln: priceB.toString() };
+    return { supplyA: dxlnCoin, supplyB: usdcCoin, dxlnToUsdc: priceA, usdcToDxln: priceB };
   }
 
-  async swap(
-    address: string,
-    amount: string,
-    wishDenom: string,
-    hasDenom: string,
-    price: string,
-    options?: TxOptions,
-  ): Promise<any> {
-    console.log({ address, amount, wishDenom, hasDenom, price });
-    const from = this.from;
-    console.log({
-      swap_requester_address: address,
-      pool_id: 1,
-      swap_type_id: 1,
-      demand_coin_denom: wishDenom,
-      order_price: price,
-      offer_coin: { denom: hasDenom, amount },
-      offer_coin_fee: {
-        denom: hasDenom,
-        amount: '3',
-      },
-    });
+  async depositAmm(address: string, coinA: Coin, coinB: Coin, options?: TxOptions): Promise<any> {
+    const grantee = this.from;
 
     const msg = {
-      typeUrl: MsgSwapWithinBatch.typeUrl,
-      value: MsgSwapWithinBatch.encode(
-        MsgSwapWithinBatch.fromPartial({
-          swap_requester_address: address,
+      typeUrl: MsgDepositWithinBatch.typeUrl,
+      value: MsgDepositWithinBatch.encode(
+        MsgDepositWithinBatch.fromPartial({
+          depositor_address: address,
           pool_id: 1,
-          swap_type_id: 1,
-          demand_coin_denom: wishDenom,
-          order_price: price,
-          offer_coin: { denom: hasDenom, amount },
-          offer_coin_fee: {
-            denom: hasDenom,
-            amount: '3',
-          },
+          deposit_coins: [coinA, coinB],
         }),
       ).finish(),
     };
 
-    return await this.authzWrapAndPushTx(from, [msg], options);
+    return await this.authzWrapAndPushTx(grantee, [msg], options);
+  }
+
+  async swap(address: string, wishDenom: string, hasCoin: Coin, price: string, options?: TxOptions): Promise<any> {
+    const grantee = this.from;
+
+    const msg = {
+      typeUrl: MsgSwapWithinBatchSimpified.typeUrl,
+      value: MsgSwapWithinBatchSimpified.encode(
+        MsgSwapWithinBatchSimpified.fromPartial({
+          swap_requester_address: address,
+          offer_coin: hasCoin,
+          demand_coin_denom: wishDenom,
+          price,
+        }),
+      ).finish(),
+    };
+    return await this.authzWrapAndPushTx(grantee, [msg], options);
   }
 
   async withdraw(granter: string, denom: string, amount: string, chainId: number, options?: TxOptions): Promise<any> {
